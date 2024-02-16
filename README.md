@@ -40,7 +40,7 @@ sudo cateye install catest
 catest
 ```
 
-### Output
+### Run-Output
 
 ```
 welcome!
