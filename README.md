@@ -28,7 +28,7 @@ Download and Install: https://dl.kamu.jp/catest/catest.tar
 [+] Installation of catest and that dependencies completed successfully
 ```
 
-## Install Test
+## Catest (Cateye Testing File)
 
 ```zsh
 sudo cateye install catest
