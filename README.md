@@ -1,9 +1,9 @@
 # cateye
 Download and Install `Kamu Package`
 
-## Download, Install and Setup Cateye
+## Download, Install and Setup Cateye with Homebrew
 
-### download info
+### download info to homebrew
 
 ```zsh
 brew tap DiamondGotCat/cateye
