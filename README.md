@@ -1,20 +1,32 @@
 # cateye
 Download from Kamu Dev and Install tool.
 
-## Install
+## Install Cateye
 
 ```zsh
 brew tap DiamondGotCat/cateye
 brew install cateye
 ```
 
-## Example
+## Install or Update Kamu Package With Cateye
 
 ```zsh
-sudo cateye install <name>
+sudo cateye install [package name]
 ```
 
-### Output
+## Update Cateye
+
+```zsh
+sudo cateye update
+```
+
+## Catest (Cateye Testing File)
+
+```zsh
+sudo cateye install catest
+```
+
+### Install Catest Screen (V1.2)
 
 ```
 password: <user's password>
@@ -28,20 +40,20 @@ Download and Install: https://dl.kamu.jp/catest/catest.tar
 [+] Installation of catest and that dependencies completed successfully
 ```
 
-## Catest (Cateye Testing File)
-
-```zsh
-sudo cateye install catest
-```
-
-### Run
+### Test
 
 ```zsh
 catest
 ```
 
-### Run-Output
+#### Testing Screen (OK Screen)
 
 ```
 welcome!
+```
+
+#### Testing Screen (NG Screen)
+
+```
+zsh: command not found: catest
 ```
