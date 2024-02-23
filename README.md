@@ -8,10 +8,16 @@ brew tap DiamondGotCat/cateye
 brew install cateye
 ```
 
-## Install or Update Kamu Package With Cateye
+## [ Download and Install ] or [ Update ] Kamu Package from Kamu Dev With Cateye
 
 ```zsh
 sudo cateye install [package name]
+```
+
+## [ Download and Install ] or [ Update ] Kamu Package from Other Site With Cateye
+
+```zsh
+sudo cateye url [package name] [url of Kamu Package JSON]
 ```
 
 ## Update Cateye
