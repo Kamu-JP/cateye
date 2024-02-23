@@ -1,5 +1,5 @@
 # cateye
-Download from Kamu Dev and Install tool.
+Download and Install `Kamu Package`
 
 ## Install Cateye
 
