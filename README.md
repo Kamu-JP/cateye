@@ -1,11 +1,24 @@
 # cateye
 Download and Install `Kamu Package`
 
-## Install Cateye
+## Download, Install and Setup Cateye
+
+### download info
 
 ```zsh
 brew tap DiamondGotCat/cateye
+```
+
+### install
+
+```zsh
 brew install cateye
+```
+
+### Switch to the latest secure version
+
+```zsh
+sudo cateye update
 ```
 
 ## [ Download and Install ] or [ Update ] Kamu Package from Kamu Dev With Cateye
