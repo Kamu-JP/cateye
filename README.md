@@ -1,7 +1,7 @@
 # cateye
 Download and Install `Kamu Package`
 
-[日本語は準備中です](README_JP.md)
+[日本語](README_JP.md)
 
 ## Download, Install and Setup Cateye with Homebrew
 
