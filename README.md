@@ -63,3 +63,22 @@ welcome!
 ```
 zsh: command not found: catest
 ```
+
+## for Developer
+
+### How to Create [ Kamu Package JSON ]
+Create a JSON file with the following structure and publish it on the web.
+
+```json
+{
+
+"url": "Specify the URL of the Tar file containing the binary or Unix executable file here",
+  "dependencies": {
+
+    "Specify dependency tar file here",
+    "Specify dependency tar file here (2)"
+
+  }
+
+}
+```
