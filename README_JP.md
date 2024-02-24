@@ -33,7 +33,7 @@ sudo cateye install [package name]
 sudo cateye url [package name] [url of Kamu Package JSON]
 ```
 
-## キャットアイをアップデート
+## キャットアイをアップデートまたは再インストール
 
 ```zsh
 sudo cateye update
