@@ -1,3 +1,7 @@
+https://github.com/DiamondGotCat/cateye/assets/124330624/08951053-18de-43dc-8c58-fc425ab5f503
+
+Audio by Youtube Audio library
+
 # キャットアイ
 `Kamu Package`をダウンロードしてインストールするソフトです。
 
