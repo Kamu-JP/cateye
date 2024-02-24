@@ -107,8 +107,7 @@ Create a JSON file with the following structure and publish it on the web.
     "Specify dependency tar file here",
     "Specify dependency tar file here (2)"
 
-  }
-
+  },
   "script": {
 
     "If you need to run a command to set it up, enter it here",
