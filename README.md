@@ -3,6 +3,14 @@ Download and Install `Kamu Package`
 
 [日本語](README_JP.md) | [Homebrew](https://github.com/DiamondGotCat/homebrew-cateye/)
 
+## Operating environment
+
+### macOS
+**Tested:** macOS Sonoma, Homebrew 4.2.9
+
+### Linux
+**Not tested**
+
 ## Download, Install and Setup Cateye with Homebrew
 
 ### download info to homebrew
