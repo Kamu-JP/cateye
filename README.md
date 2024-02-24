@@ -6,7 +6,8 @@ Download and Install `Kamu Package`
 ## Operating environment
 
 ### macOS
-**Tested:** macOS Sonoma, Homebrew 4.2.9
+**Tested:**
+- macOS Sonoma, Homebrew 4.2.9
 
 ### Linux
 **Not tested**
