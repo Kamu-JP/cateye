@@ -1,6 +1,15 @@
 # キャットアイ
 `Kamu Package`をダウンロードしてインストールするソフトです。
 
+## 動作環境
+
+### macOS
+**テスト済み:**
+- macOS Sonoma, Homebrew 4.2.9
+
+### Linux
+**テストされていません**
+
 ## Homebrewでキャットアイをインストール
 
 ### 情報をHomebrewへダウンロード
