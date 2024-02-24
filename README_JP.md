@@ -106,5 +106,12 @@ zsh: command not found: catest
 
   }
 
+  "script": {
+
+    "If you need to run a command to set it up, enter it here",
+    "If there is more than one, they will be executed in order"
+
+  }
+
 }
 ```
