@@ -99,19 +99,18 @@ zsh: command not found: catest
 {
 
   "url": "Specify the URL of the Tar file containing the binary or Unix executable file here",
-  "dependencies": {
+  "dependencies": [
 
     "Specify dependency tar file here",
     "Specify dependency tar file here (2)"
 
-  }
-
-  "script": {
+  ],
+  "script": [
 
     "If you need to run a command to set it up, enter it here",
     "If there is more than one, they will be executed in order"
 
-  }
+  ]
 
 }
 ```
