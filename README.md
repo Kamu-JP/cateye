@@ -23,13 +23,13 @@ brew install cateye
 sudo cateye update
 ```
 
-## [ Download and Install ] or [ Update ] Kamu Package from Kamu Dev With Cateye
+## Install or Update Kamu Package from Kamu Dev With Cateye
 
 ```zsh
 sudo cateye install [package name]
 ```
 
-## [ Download and Install ] or [ Update ] Kamu Package from Other Site With Cateye
+## Install or Update Kamu Package from Other Site With Cateye
 
 ```zsh
 sudo cateye url [package name] [url of Kamu Package JSON]
