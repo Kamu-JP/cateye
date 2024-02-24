@@ -85,7 +85,7 @@ zsh: command not found: catest
 ```json
 {
 
-"url": "Specify the URL of the Tar file containing the binary or Unix executable file here",
+  "url": "Specify the URL of the Tar file containing the binary or Unix executable file here",
   "dependencies": {
 
     "Specify dependency tar file here",
