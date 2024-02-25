@@ -1,3 +1,3 @@
-- catest: Cateye Testing File (https://dl.kamu.jp/catest/pkg.json)
-- newline: Create new line In File (https://dl.kamu.jp/newline/pkg.json)
-- newpath: Add path to $PATH (https://dl.kamu.jp/newpath/pkg.json)
+- **catest: Cateye Testing File** (https://dl.kamu.jp/catest/pkg.json)
+- **newline: Create new line In File** (https://dl.kamu.jp/newline/pkg.json)
+- **newpath: Add path to $PATH** (https://dl.kamu.jp/newpath/pkg.json)
