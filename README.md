@@ -84,7 +84,7 @@ catest
 #### Testing Screen (OK Screen)
 
 ```
-welcome!
+State: OK!
 ```
 
 #### Testing Screen (NG Screen)
