@@ -101,6 +101,7 @@ Create a JSON file with the following structure and publish it on the web.
 ```json
 {
 
+  "name": "example_json",
   "url": "Specify the URL of the Tar file containing the binary or Unix executable file here",
   "dependencies": [
 
