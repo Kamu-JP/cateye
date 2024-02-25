@@ -6,7 +6,7 @@ Audio by Youtube Audio library
 
 Download and Install `Kamu Package`
 
-[日本語](README_JP.md) | [Homebrew](https://github.com/DiamondGotCat/homebrew-cateye/) | [Packages by Kamu-JP](OFFICIAL_PACKAGES.md)
+[日本語](README_JP.md) | [Homebrew](https://github.com/DiamondGotCat/homebrew-cateye/) | [Packages by Kamu-JP](https://dl.kamu.jp/cateye/packages/)
 
 ## Operating environment
 
