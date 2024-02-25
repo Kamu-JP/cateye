@@ -5,6 +5,8 @@ Audio by Youtube Audio library
 # キャットアイ
 `Kamu Package`をダウンロードしてインストールするソフトです。
 
+[Kamu-JP公式パッケージ](OFFICIAL_PACKAGES.md)
+
 ## 動作環境
 
 ### macOS
