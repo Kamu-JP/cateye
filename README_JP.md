@@ -5,7 +5,7 @@ Audio by Youtube Audio library
 # キャットアイ
 `Kamu Package`をダウンロードしてインストールするソフトです。
 
-[Kamu-JP公式パッケージ](OFFICIAL_PACKAGES.md)
+[Kamu-JP公式パッケージ](https://dl.kamu.jp/cateye/packages/)
 
 ## 動作環境
 
