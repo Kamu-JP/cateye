@@ -105,8 +105,8 @@ Create a JSON file with the following structure and publish it on the web.
   "url": "Specify the URL of the Tar file containing the binary or Unix executable file here",
   "dependencies": [
 
-    "Specify dependency tar file here",
-    "Specify dependency tar file here (2)"
+    "Specify dependency Kamu Package JSON file here",
+    "Specify dependency Kamu Package JSON file here (2)"
 
   ],
   "script": [
