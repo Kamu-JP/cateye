@@ -17,6 +17,12 @@ Download and Install `Kamu Package`
 ### Linux
 **Not tested**
 
+## Check the [local version] and [latest version] of Cateye
+
+```zsh
+sudo cateye version
+```
+
 ## Download, Install and Setup Cateye with Homebrew
 
 ### download info to homebrew
