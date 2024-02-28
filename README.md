@@ -16,10 +16,6 @@ Download and Install `Kamu Package`
 **Tested:**
 - macOS Sonoma, Homebrew 4.2.9
 
-### Linux
-**Tested:**
-- Fedora Linux 38 (Workstation Edition), Debian file
-
 ## Check the [local version] and [latest version] of Cateye
 
 ```zsh
