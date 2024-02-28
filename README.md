@@ -24,6 +24,12 @@ sudo cateye version
 
 ## Download, Install and Setup Cateye with Homebrew
 
+### Install homebrew
+
+```zsh
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
 ### download info to homebrew
 
 ```zsh
