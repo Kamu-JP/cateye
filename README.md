@@ -12,9 +12,10 @@ This is software for installing Kamu Package.
 
 ## Operating environment
 
-### macOS & Linux(Debian)
+### macOS & Linux
 **Tested:**
 - macOS Sonoma (Apple silicon), Homebrew 4.2.9
+- Fedora linux 38 (arm64)
 
 ## Check the [local version] and [latest version] of Cateye
 
