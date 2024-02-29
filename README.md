@@ -4,7 +4,7 @@ Audio by Youtube Audio library
 
 # cateye (Japanese: キャットアイ)
 
-Download and Install `Kamu Package`
+This is software for installing Kamu Package.
 
 [Homebrew](https://github.com/DiamondGotCat/homebrew-cateye/) | [Packages by Kamu Dev](https://dl.kamu.jp/cateye/packages/) | [for Windows](https://github.com/Kamu-JP/cateye-win/)
 
