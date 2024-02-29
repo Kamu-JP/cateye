@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="5.0.0"
+cateyeversion="5.0.1"
 cateyechanges="\e[32m[+]\e[0m Added option to customize the Kamu Package JSON to allow installation of different versions of software depending on the environment. We also released the Cateye Development Kit built-in for Cateye to more easily make software compatible with Cateye.\n"
 
 # Check if running with sudo
@@ -121,10 +121,13 @@ get_os() {
     # macOSの場合、バージョンを取得
     if [[ "$os_type" == "macos" ]]; then
         os_version=$(sw_vers -productVersion)
+        os_version=$(echo "$os_version" | awk -F. '{print $1}')
     # Linuxの場合、/etc/os-releaseからバージョンを取得
     elif [[ "$os_type" == "linux" ]]; then
         if [ -e /etc/os-release ]; then
             os_version=$(grep "VERSION_ID" /etc/os-release | cut -d '"' -f 2)
+            os_version=$(echo "$os_version" | sed 's/VERSION_ID=//')
+            os_version=$(echo "$os_version" | awk -F. '{print $1}')
         else
             os_version="unknown"
         fi
