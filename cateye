@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cateyeversion="4.1.6"
-cateyechanges="\e[32m[+]\e[0m Fixed an issue where the display may become incorrect when executing the version command in some terminal applications.\n"
+cateyeversion="5.0.0"
+cateyechanges="\e[32m[+]\e[0m Added option to customize the Kamu Package JSON to allow installation of different versions of software depending on the environment. We also released the Cateye Development Kit built-in for Cateye to more easily make software compatible with Cateye.\n"
 
 # Check if running with sudo
 if [ $EUID -ne 0 ]; then
@@ -56,9 +56,24 @@ install_dependencies() {
         install_dependencies "$url2"
     done
 
-    main_url2=$(echo "$pkg_json2" | jq -r '.url')
-    printf "\e[34m[+]\e[0m Found Dependencies in JSON File: $main_url2\n"
-    download_and_install "$main_url2"
+    os_id=$(get_os)
+
+    # 確認したいキー
+    target_key="$os_id"
+
+    # jqを使用して、指定したキーがJSONデータ内に存在するか確認
+    if url_of_software_for_this_os=$(echo "$pkg_json2" | jq -r ".$target_key"); then
+        
+        printf "\e[34m[+]\e[0m Found Dependencies in JSON File: $url_of_software_for_this_os\n"
+        download_and_install "$url_of_software_for_this_os"
+
+    else
+
+        main_url2=$(echo "$pkg_json2" | jq -r '.url')
+        printf "\e[34m[+]\e[0m Found Dependencies in JSON File: $main_url2\n"
+        download_and_install "$main_url2"
+
+    fi
 
     printf "\e[34m==>\e[0m Running setup script for '$url2'...\n"
 
@@ -85,6 +100,37 @@ install_dependencies() {
         
     esac
 
+
+}
+
+get_os() {
+
+    os_type="other"
+
+    # OSの種類を取得
+    if [[ "$(uname)" == "Darwin" ]]; then
+        os_type="macos"
+    elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]]; then
+        os_type="linux"
+    else
+        os_type="other"
+    fi
+
+    os_version="unknown"
+
+    # macOSの場合、バージョンを取得
+    if [[ "$os_type" == "macos" ]]; then
+        os_version=$(sw_vers -productVersion)
+    # Linuxの場合、/etc/os-releaseからバージョンを取得
+    elif [[ "$os_type" == "linux" ]]; then
+        if [ -e /etc/os-release ]; then
+            os_version=$(grep "VERSION_ID" /etc/os-release | cut -d '"' -f 2)
+        else
+            os_version="unknown"
+        fi
+    fi
+
+    echo "$os_type-$os_version"
 
 }
 
@@ -117,12 +163,16 @@ case "$command" in
     "version")
 
         latest_version=$(get_latest_version)
+        os_id=$(get_os)
 
         if [[ "$cateyeversion" == "$latest_version" ]]; then
             echo "cateye V$cateyeversion (Up to date)"
         else
             echo "cateye V$cateyeversion (latest: V$latest_version)"
         fi
+
+        printf "\e[34m==>\e[0m OS\n"
+        echo "$os_id"
 
         printf "\e[34m==>\e[0m PATH of Cateye\n"
         echo "$0"
@@ -146,6 +196,8 @@ case "$command" in
             exit 1
         fi
 
+        os_id=$(get_os)
+
         package_name=$2
 
         printf "\e[34m==>\e[0m Running...\n"
@@ -161,10 +213,28 @@ case "$command" in
             install_dependencies "$json_url2"
         done
 
-        # Step 3: Download and add main package to system bin directory
-        main_url=$(echo "$pkg_json" | jq -r '.url')
-        printf "\e[34m[+]\e[0m Found Main url in JSON File: $main_url\n"
-        download_and_install_main "$main_url"
+
+
+        os_id=$(get_os)
+
+        # 確認したいキー
+        target_key="$os_id"
+
+        # jqを使用して、指定したキーがJSONデータ内に存在するか確認
+        if url_of_software_for_this_os=$(echo "$pkg_json" | jq -r ".$target_key"); then
+            
+            printf "\e[34m[+]\e[0m Found Main url in JSON File: $url_of_software_for_this_os\n"
+            download_and_install "$url_of_software_for_this_os"
+
+        else
+
+            main_url=$(echo "$pkg_json" | jq -r '.url')
+            printf "\e[34m[+]\e[0m Found Main url in JSON File: $main_url\n"
+            download_and_install_main "$main_url"
+
+        fi
+
+        
 
         # Step 4: Running Install script
         printf "\e[34m==>\e[0m Running setup script for '$package_name'...\n"
@@ -239,10 +309,24 @@ case "$command" in
             install_dependencies "$json_url2"
         done
 
-        # Step 3: Download and add main package to system bin directory
-        main_url=$(echo "$pkg_json" | jq -r '.url')
-        printf "\e[34m[+]\e[0m Found Main url in JSON File: $main_url\n"
-        download_and_install_main "$main_url"
+        os_id=$(get_os)
+
+        # 確認したいキー
+        target_key="$os_id"
+
+        # jqを使用して、指定したキーがJSONデータ内に存在するか確認
+        if url_of_software_for_this_os=$(echo "$pkg_json" | jq -r ".$target_key"); then
+            
+            printf "\e[34m[+]\e[0m Found Main url in JSON File: $url_of_software_for_this_os\n"
+            download_and_install "$url_of_software_for_this_os"
+
+        else
+
+            main_url=$(echo "$pkg_json" | jq -r '.url')
+            printf "\e[34m[+]\e[0m Found Main url in JSON File: $main_url\n"
+            download_and_install_main "$main_url"
+
+        fi
 
         # Step 4: Running Install script
         printf "\e[34m==>\e[0m Running setup script for '$package_name'...\n"
