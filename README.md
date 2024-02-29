@@ -12,7 +12,7 @@ This is software for installing Kamu Package.
 
 ## Operating environment
 
-### macOS
+### macOS & Linux(Debian)
 **Tested:**
 - macOS Sonoma, Homebrew 4.2.9
 
