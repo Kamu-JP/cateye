@@ -76,6 +76,8 @@ Create a JSON file with the following structure and publish it on the web.
 
   "name": "example_json",
   "url": "Specify the URL of the Tar file containing the binary or Unix executable file here",
+  "macos-14.3.1": "Enter the package URL for the specified OS here. In this case, enter the URL for macOS Sonoma (14.3.1). (This key is optional)",
+  "linux-VERSION_ID=38": "Enter the package URL for the specified OS here. In this case, enter the URL for Fedora linux 38. (This key is optional)",
   "dependencies": [
 
     "Specify dependency Kamu Package JSON file here",
