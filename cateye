@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="5.0.2"
+cateyeversion="5.0.3"
 cateyechanges="\e[32m[+]\e[0m Added option to customize the Kamu Package JSON to allow installation of different versions of software depending on the environment. We also released the Cateye Development Kit built-in for Cateye to more easily make software compatible with Cateye.\n"
 
 # Check if running with sudo
@@ -62,7 +62,10 @@ install_dependencies() {
     target_key="$os_id"
 
     # jqを使用して、指定したキーがJSONデータ内に存在するか確認
-    if url_of_software_for_this_os=$(echo "$pkg_json2" | jq -r ".$target_key"); then
+    result=$(echo "$pkg_json" | jq ". | has(\"$target_key\")")
+
+    # jqを使用して、指定したキーがJSONデータ内に存在するか確認
+    if [ "$result" == "true" ]; then
         
         printf "\e[34m[+]\e[0m Found Dependencies in JSON File: $url_of_software_for_this_os\n"
         download_and_install "$url_of_software_for_this_os"
@@ -224,7 +227,9 @@ case "$command" in
         target_key="$os_id"
 
         # jqを使用して、指定したキーがJSONデータ内に存在するか確認
-        if url_of_software_for_this_os=$(echo "$pkg_json" | jq -r ".$target_key"); then
+        result=$(echo "$pkg_json" | jq ". | has(\"$target_key\")")
+
+        if [ "$result" == "true" ]; then
             
             printf "\e[34m[+]\e[0m Found Main url in JSON File: $url_of_software_for_this_os\n"
             download_and_install "$url_of_software_for_this_os"
@@ -318,7 +323,10 @@ case "$command" in
         target_key="$os_id"
 
         # jqを使用して、指定したキーがJSONデータ内に存在するか確認
-        if url_of_software_for_this_os=$(echo "$pkg_json" | jq -r ".$target_key"); then
+        result=$(echo "$pkg_json" | jq ". | has(\"$target_key\")")
+
+        # jqを使用して、指定したキーがJSONデータ内に存在するか確認
+        if [ "$result" == "true" ]; then
             
             printf "\e[34m[+]\e[0m Found Main url in JSON File: $url_of_software_for_this_os\n"
             download_and_install "$url_of_software_for_this_os"
