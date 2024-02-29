@@ -93,6 +93,7 @@ Create a JSON file with the following structure and publish it on the web.
 ```
 
 # Catest (Cateye Testing File)
+Catest is software that checks whether Cateye is working properly.
 
 ```zsh
 sudo cateye install catest
