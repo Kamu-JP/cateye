@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cateyeversion="5.2.0"
-cateyechanges="\e[32m[+]\e[0m Improved code visibility\n"
+cateyeversion="5.2.1"
+cateyechanges="Improved code visibility\n"
 
 # Check if running with sudo
 if [ "$EUID" -ne 0 ]; then
