@@ -20,7 +20,7 @@ This is software for installing Kamu Package.
 ## Check the [local version] and [latest version] of Cateye
 
 ```zsh
-sudo cateye version
+cateye version
 ```
 
 ## Download, Install and Setup Cateye with Homebrew
@@ -52,13 +52,13 @@ sudo cateye update
 ## Install or Update Kamu Package from Kamu Dev With Cateye
 
 ```zsh
-sudo cateye install [package name]
+cateye install [package name]
 ```
 
 ## Install or Update Kamu Package from Other Site With Cateye
 
 ```zsh
-sudo cateye url [url of Kamu Package JSON]
+cateye url [url of Kamu Package JSON]
 ```
 
 ## Update (or Reinstall) Cateye
