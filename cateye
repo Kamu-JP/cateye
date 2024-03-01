@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="5.12.0"
+cateyeversion="5.13.0"
 cateyechanges="Added symbol to logging"
 
 # Extract command and package name from argument
@@ -21,7 +21,7 @@ download_and_install() {
     rm "./$package_name"
     logging "info" "Setting file: $filename"
     chmod +x "/usr/local/bin/$package_name"
-    logging "step" "installed: $package_name"
+    logging "checkmark" "installed: $package_name"
 }
 
 logging() {
@@ -159,6 +159,8 @@ install_dependencies() {
             ;;
     esac
 
+    logging "checkmark" "Installed dependencies: $package_name"
+
 }
 
 get_os() {
@@ -206,11 +208,11 @@ case "$command" in
             echo "Current: cateye V$cateyeversion (Up to date)"
             logging "checkmark" "No update."
         else
-            echo "Current: cateye V$cateyeversion (latest: V$latest_version)"
+            logging "step" "Update cateye V$cateyeversion to V$latest_version"
             logging "info" "Updating Cateye: $current_script"
             current_script="$0"
             logging "info" "Downloading latest script to $current_script"
-            curl -sS -o "$current_script" "https://dl.kamu.jp/cateye/cateye" || { printf "\e[31m[!] Failed to download latest script\e[0m\n"; exit 1; }
+            curl -sS -o "$current_script" "https://dl.kamu.jp/cateye/cateye" || { logging "error" "Failed to download latest script"; exit 1; }
             chmod +x "$current_script"
             logging "checkmark" "Updated successfully."
         fi
@@ -219,21 +221,24 @@ case "$command" in
         latest_version=$(get_latest_version)
         os_id=$(get_os)
         if [[ "$cateyeversion" == "$latest_version" ]]; then
-            echo "cateye V$cateyeversion (Up to date)"
+            echo "cateye V$cateyeversion"
+            logging "checkmark" "Up to date."
         else
-            echo "cateye V$cateyeversion (latest: V$latest_version)"
+            echo "cateye V$cateyeversion"
+            logging "warn" "A newer version is available: V$latest_version"
+            logging "warn" "Consider running: cateye update" 
         fi
         logging "step" "OS" 
         echo "OS: $os_id"
         logging "step" "PATH of Cateye" 
         echo "PATH: $0"
-        logging "step" "Update of This version" 
+        logging "step" "Update of current version" 
         logging "info" "$cateyechanges"
         ;;
     "install")
 
         if [ -n "$2" ]; then
-            logging "info" "The number of arguments is normal. Start the installation."
+            logging "checkmark" "The number of arguments is normal. Start the installation."
         else
             logging "error" "Not enough arguments" 
             exit 1
