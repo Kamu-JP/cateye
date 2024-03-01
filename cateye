@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cateyeversion="5.1.0"
-cateyechanges="\e[32m[+]\e[0m Code improvements and bug fixes\n"
+cateyeversion="5.2.0"
+cateyechanges="\e[32m[+]\e[0m Improved code visibility\n"
 
 # Check if running with sudo
 if [ "$EUID" -ne 0 ]; then
@@ -30,6 +30,30 @@ download_and_install() {
     printf "\e[34m[+]\e[0m installed: $package_name\n"
 }
 
+logging() {
+
+    local mode="$1"
+    local message="$2"
+    case $mode in
+        "step")
+            printf "\e[34m==>\e[0m $message\n"
+            ;;
+        "info")
+            printf "\e[34m[+]\e[0m $message\n"
+            ;;
+        "warn")
+            printf "\e[33m[-]\e[0m $message\n"
+            ;;
+        "error")
+            printf "\e[31m[!]\e[0m $message\n"
+            ;;
+        *)
+            printf "\e[31m[!]\e[0m Internal script error, unknown mode: $mode\n"
+            exit 1
+            ;;
+    esac
+}
+
 install_dependencies() {
     local json_url="$1"
     local pkg_json
@@ -39,7 +63,7 @@ install_dependencies() {
     local dependencies
     dependencies=$(echo "$pkg_json" | jq -r '.dependencies | to_entries[] | .value')
     for url in $dependencies; do
-        printf "\e[34m[+]\e[0m Found Dependencies in JSON File: $url\n"
+        logging "info" "Found Dependencies in JSON File: $url"
         install_dependencies "$url"
     done
 
@@ -51,16 +75,16 @@ install_dependencies() {
     url_of_software_for_this_os=$(echo "$pkg_json" | jq -r ".$target_key")
 
     if [ -n "$url_of_software_for_this_os" ]; then
-        printf "\e[34m[+]\e[0m Found Dependencies in JSON File: $url_of_software_for_this_os\n"
+        logging "info" "Found Dependencies in JSON File: $url_of_software_for_this_os"
         download_and_install "$url_of_software_for_this_os"
     else
         local main_url
         main_url=$(echo "$pkg_json" | jq -r '.url')
-        printf "\e[34m[+]\e[0m Found Dependencies in JSON File: $main_url\n"
+        logging "info" "Found Dependencies in JSON File: $main_url"
         download_and_install "$main_url"
     fi
 
-    printf "\e[34m==>\e[0m Running setup script for '$url2'...\n"
+    logging "step" "Running setup script for '$url2'..."
 
     local runscript=true
     local scripts
@@ -69,12 +93,12 @@ install_dependencies() {
     case $runscript in
         true)
             for script in $scripts; do
-                printf "\e[34m[+]\e[0m Script: $script\n"
+                logging "step" "Running setup script: '$script'..."
                 eval "$script"
             done
             ;;
         *)
-            printf "\e[34m==>\e[0m Skip Running Install script.\n"
+            logging "step" "Skip Running Install script: all script"
             ;;
     esac
 }
@@ -114,16 +138,16 @@ case "$command" in
     "update")
         latest_version=$(get_latest_version)
         if [[ "$cateyeversion" == "$latest_version" ]]; then
-            echo "cateye V$cateyeversion (Up to date)"
-            printf "\e[31m[!] No update. \e[0m\n"
+            echo "Current: cateye V$cateyeversion (Up to date)"
+            logging "info" "No update."
         else
-            echo "cateye V$cateyeversion (latest: V$latest_version)"
-            echo "Updating Cateye..."
+            echo "Current: cateye V$cateyeversion (latest: V$latest_version)"
+            logging "info" "Updating Cateye: $current_script"
             current_script="$0"
-            echo "Downloading latest script..."
+            logging "info" "Downloading latest script to $current_script"
             curl -sS -o "$current_script" "https://dl.kamu.jp/cateye/cateye" || { printf "\e[31m[!] Failed to download latest script\e[0m\n"; exit 1; }
             chmod +x "$current_script"
-            echo "Updated successfully."
+            logging "info" "Updated successfully."
         fi
         ;;
     "version")
@@ -134,40 +158,40 @@ case "$command" in
         else
             echo "cateye V$cateyeversion (latest: V$latest_version)"
         fi
-        printf "\e[34m==>\e[0m OS\n"
-        echo "$os_id"
-        printf "\e[34m==>\e[0m PATH of Cateye\n"
-        echo "$0"
-        printf "\e[34m==>\e[0m Changes of This version\n"
-        printf "$cateyechanges"
+        logging "step" "OS"
+        echo "OS: $os_id"
+        logging "step" "PATH of Cateye"
+        echo "PATH: $0"
+        logging "step" "Update of This version"
+        logging "info" "$cateyechanges"
         ;;
     "install")
         if [ -n "$2" ]; then
-            printf "\e[34m[+]\e[0m The number of arguments is normal. Start the installation.\n"
+            logging "info" "The number of arguments is normal. Start the installation."
         else
-            printf "\e[31m[!]\e[0m Not enough arguments\n"
+            logging "error" "Not enough arguments"
             exit 1
         fi
 
         os_id=$(get_os)
         package_name="$2"
-        printf "\e[34m==>\e[0m Running...\n"
+        logging "step" "Start the installation."
         json_url="https://dl.kamu.jp/$package_name/pkg.json"
-        pkg_json=$(curl -sS "$json_url") || { printf "\e[31m [!]\e[0m Failed to retrieve JSON File from $json_url\n"; exit 1; }
+        pkg_json=$(curl -sS "$json_url") || { logging "error" "Failed to retrieve JSON File from $json_url"; exit 1; }
         dependencies=$(echo "$pkg_json" | jq -r '.dependencies | to_entries[] | .value')
         for url in $dependencies; do
-            printf "\e[34m[+]\e[0m Found external JSON File in JSON File: $url\n"
+            logging "info" "Found external JSON File in JSON File: $url"
             install_dependencies "$url"
         done
         os_id=$(get_os)
         target_key="$os_id"
         result=$(echo "$pkg_json" | jq ". | has(\"$target_key\")")
         if [ "$result" == "true" ]; then
-            printf "\e[34m[+]\e[0m Found Main url in JSON File: $url_of_software_for_this_os\n"
+            logging "info" "Found Main url in JSON File: $url_of_software_for_this_os"
             download_and_install "$url_of_software_for_this_os"
         else
             main_url=$(echo "$pkg_json" | jq -r '.url')
-            printf "\e[34m[+]\e[0m Found Main url in JSON File: $main_url\n"
+            logging "info" "Found Main url in JSON File: $main_url"
             download_and_install "$main_url"
         fi
         printf "\e[34m==>\e[0m Running setup script for '$package_name'...\n"
@@ -176,76 +200,76 @@ case "$command" in
         case $runscript in
             true)
                 for script in $scripts; do
-                    printf "\e[34m[+]\e[0m Script: $script\n"
+                    logging "step" "Running setup script: '$script'..."
                     eval "$script"
                 done
                 ;;
             *)
-                printf "\e[34m==>\e[0m Skip Running Install script.\n"
+                logging "step" "Skip Running Install script."
                 ;;
         esac
         printf "\e[34m==>\e[0m Done.\n"
         latest_version=$(get_latest_version)
         if [[ "$cateyeversion" != "$latest_version" ]]; then
-            printf "\e[33m[-]\e[0m A newer version is available: V$latest_version\n"
-            printf "\e[33m[-]\e[0m Consider running: sudo cateye update\n"
+            logging "info" "A newer version is available: V$latest_version"
+            logging "info" "Consider running: sudo cateye update\n"
         fi
-        printf "\e[34m[+]\e[0m Installation of $package_name and that dependencies completed successfully\n"
+        logging "info" "Installation of $package_name and that dependencies completed successfully"
         ;;
     "url")
         package_name="$2"
         if [ -n "$2" ] && [ -n "$3" ]; then
-            printf "\e[34m[+]\e[0m The number of arguments is normal. Start the installation from the URL.\n"
+            logging "info" "The number of arguments is normal. Start the installation from the URL."
         else
-            printf "\e[31m[!]\e[0m Not enough arguments\n"
+            logging "error" "Not enough arguments"
             exit 1
         fi
         package_url="$3"
-        printf "\e[34m==>\e[0m Running...\n"
+        logging "step" "Running from the URL."
         json_url="$package_url"
-        pkg_json=$(curl -sS "$json_url") || { printf "\e[31m [!]\e[0m Failed to retrieve JSON File from $json_url\n"; exit 1; }
+        pkg_json=$(curl -sS "$json_url") || { logging "error" "Failed to retrieve JSON File from $json_url"; exit 1; }
         dependencies=$(echo "$pkg_json" | jq -r '.dependencies | to_entries[] | .value')
         for url in $dependencies; do
-            printf "\e[34m[+]\e[0m Found external JSON File in JSON File: $url\n"
+            logging "info" "Found external JSON File in JSON File: $url"
             install_dependencies "$url"
         done
         os_id=$(get_os)
         target_key="$os_id"
         result=$(echo "$pkg_json" | jq ". | has(\"$target_key\")")
         if [ "$result" == "true" ]; then
-            printf "\e[34m[+]\e[0m Found Main url in JSON File: $url_of_software_for_this_os\n"
+            logging "info" "Found Main url in JSON File: $url_of_software_for_this_os"
             download_and_install "$url_of_software_for_this_os"
         else
             main_url=$(echo "$pkg_json" | jq -r '.url')
-            printf "\e[34m[+]\e[0m Found Main url in JSON File: $main_url\n"
+            logging "info" "Found Main url in JSON File: $main_url"
             download_and_install "$main_url"
         fi
-        printf "\e[34m==>\e[0m Running setup script for '$package_name'...\n"
+        logging "step" "Running setup script for '$package_name'..."
         runscript=true
         scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { printf "\e[31m[!]\e[0m Skip this because there is no setup script.\n"; runscript=false; }
         case $runscript in
             true)
                 for script in $scripts; do
-                    printf "\e[34m[+]\e[0m Script: $script\n"
+                    logging "step" "Running setup script: '$script'..."
                     eval "$script"
                 done
                 ;;
             *)
-                printf "\e[34m==>\e[0m Skip Running Install script.\n"
+                logging "step" "Skip Running Install script."
                 ;;
         esac
-        printf "\e[34m==>\e[0m Done.\n"
+        logging "step" "Done."
         latest_version=$(get_latest_version)
         if [[ "$cateyeversion" != "$latest_version" ]]; then
-            printf "\e[33m[-]\e[0m A newer version is available: V$latest_version\n"
-            printf "\e[33m[-]\e[0m Consider running: sudo cateye update\n"
+            logging "warn" "A newer version is available: V$latest_version"
+            logging "warn" "Consider running: sudo cateye update"
         fi
-        printf "\e[34m[+]\e[0m Installation of $package_name and that dependencies completed successfully\n"
+        logging "info" "Installation of $package_name and that dependencies completed successfully"
         ;;
     *)
-        printf "\e[31m[!]\e[0m Unknown command\n"
+        logging "error" "Unknown command"
         echo " "
-        printf "\e[34m==>\e[0m Usage\n"
+        logging "step" "Usage"
         echo "Update:"
         echo " sudo cateye update"
         echo "Install from Kamu Dev:"
