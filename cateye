@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="5.4.2"
+cateyeversion="5.4.3"
 cateyechanges="URL install is now not need to specify the package name!"
 
 # Extract command and package name from argument
@@ -163,6 +163,13 @@ get_latest_version() {
 
 case "$command" in
     "update")
+
+        # Check if running with sudo
+        if [ $EUID -ne 0 ]; then
+            echo "Update command is must be run as root" 
+            exit 1
+        fi
+
         latest_version=$(get_latest_version)
         if [[ "$cateyeversion" == "$latest_version" ]]; then
             echo "Current: cateye V$cateyeversion (Up to date)"
