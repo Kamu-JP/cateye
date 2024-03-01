@@ -274,8 +274,6 @@ case "$command" in
 
         read -p "Package Name: " package_name
         read -p "Package URL: " package_url
-        read -p "macOS 14 URL (optional): " macos14_url
-        read -p "Linux 38 URL (optional): " linux38_url
 
         echo "Dependencies (separated by space, press enter when done):"
         while read -r line; do
@@ -291,8 +289,6 @@ case "$command" in
 {
   "name": "$package_name",
   "url": "$package_url",
-  "macos14": "$macos14_url",
-  "linux38": "$linux38_url",
   "dependencies": [
     $(printf '"%s",' "${dependencies[@]}")
   ],
