@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cateyeversion="5.20.0"
-cateyechanges="Added symbol to logging"
+cateyeversion="5.22.0"
+cateyechanges="Added doctor command"
 
 # Extract command and package name from argument
 command="$1"
@@ -386,6 +386,21 @@ case "$command" in
 
         ;;
 
+    "doctor")
+
+        logging "step" "Show result of doctor" 
+        latest_version=$(get_latest_version)
+        if [[ "$cateyeversion" == "$latest_version" ]]; then
+            printf "\e[32m[\xE2\x9C\x94]\e[0m cateye V$cateyeversion\n"
+        else
+            logging "warn" "cateye V$cateyeversion"
+            printf "    \e[33m[-]\e[0m A newer version is available: V$latest_version\n"
+            printf "    \e[33m[-]\e[0m Consider running: cateye update\n"
+        fi
+        logging "checkmark" "Done." 
+
+        ;;
+
     "cedk")
         logging "step" "Running Cateye Development Kit..."
         echo "Cateye Development Kit"
@@ -442,8 +457,8 @@ EOF
         logging "step" "Usage" 
         echo "Update:"
         echo " cateye update"
-        echo "Run CEDK(Cateye Development Kit):"
-        echo " cateye cedk"
+        echo "Run doctor:"
+        echo " cateye doctor"
         echo "Install from Kamu Dev:"
         echo " cateye install [package name]"
         echo "Install from Other Site:"
