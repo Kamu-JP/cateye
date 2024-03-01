@@ -316,6 +316,8 @@ EOF
         logging "step" "Usage"
         echo "Update:"
         echo " sudo cateye update"
+        echo "Run CEDK(Cateye Development Kit):"
+        echo " sudo cateye cedk"
         echo "Install from Kamu Dev:"
         echo " sudo cateye install [package name]"
         echo "Install from Other Site:"
