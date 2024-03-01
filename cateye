@@ -1,13 +1,7 @@
 #!/bin/bash
 
-cateyeversion="5.4.0"
+cateyeversion="5.4.1"
 cateyechanges="URL install is now not need to specify the package name!"
-
-# Check if running with sudo
-if [ "$EUID" -ne 0 ]; then
-    echo "This script must be run as root" 
-    exit 1
-fi
 
 # Extract command and package name from argument
 command="$1"
@@ -241,7 +235,7 @@ case "$command" in
         latest_version=$(get_latest_version)
         if [[ "$cateyeversion" != "$latest_version" ]]; then
             logging "warn" "A newer version is available: V$latest_version" "yellow"
-            logging "warn" "Consider running: sudo cateye update" "yellow"
+            logging "warn" "Consider running: cateye update" "yellow"
         fi
         logging "info" "Installation of $package_name and that dependencies completed successfully" "cyan"
         ;;
@@ -291,7 +285,7 @@ case "$command" in
         latest_version=$(get_latest_version)
         if [[ "$cateyeversion" != "$latest_version" ]]; then
             logging "warn" "A newer version is available: V$latest_version" "yellow"
-            logging "warn" "Consider running: sudo cateye update" "yellow"
+            logging "warn" "Consider running: cateye update" "yellow"
         fi
         logging "info" "Installation of $package_name and that dependencies completed successfully" "cyan"
         ;;
@@ -329,7 +323,7 @@ EOF
         
         logging "info" "Kamu Package JSON has been created."
         logging "info" "Please upload kamu_package.json to your server and run the following command."
-        logging "info" "sudo cateye url [package name] [url of kamu_package.json]"
+        logging "info" "cateye url [package name] [url of kamu_package.json]"
 
         logging "step" "Done."
 
@@ -340,14 +334,14 @@ EOF
         echo " "
         logging "step" "Usage" "purple"
         echo "Update:"
-        echo " sudo cateye update"
+        echo " cateye update"
         echo "Run CEDK(Cateye Development Kit):"
-        echo " sudo cateye cedk"
+        echo " cateye cedk"
         echo "Install from Kamu Dev:"
-        echo " sudo cateye install [package name]"
+        echo " cateye install [package name]"
         echo "Install from Other Site:"
-        echo " sudo cateye url [url of Kamu Package JSON]"
+        echo " cateye url [url of Kamu Package JSON]"
         echo "Show version:"
-        echo " sudo cateye version"
+        echo " cateye version"
         ;;
 esac
