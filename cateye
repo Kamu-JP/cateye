@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="5.4.1"
+cateyeversion="5.4.2"
 cateyechanges="URL install is now not need to specify the package name!"
 
 # Extract command and package name from argument
@@ -78,52 +78,56 @@ logging() {
 }
 
 install_dependencies() {
-    local json_url="$1"
+
+    local package_url
+    local json_url
     local pkg_json
-    pkg_json=$(curl -sS "$json_url") || { printf "\e[31m [!]\e[0m Failed to retrieve JSON File from $json_url\n"; exit 1; }
     local package_name
-    package_name=$(echo "$pkg_json" | jq -r '.name')
     local dependencies
+    local os_id
+    local target_key
+    local result
+    local url_of_software_for_this_os
+    local main_url
+    local runscript
+    local scripts
+    local script
+    
+    package_url="$1"
+    json_url="$package_url"
+    pkg_json=$(curl -sS "$json_url") || { logging "error" "Failed to retrieve JSON File from $json_url" "red"; exit 1; }
+    package_name=$(echo "$pkg_json" | jq -r '.name')
     dependencies=$(echo "$pkg_json" | jq -r '.dependencies | to_entries[] | .value')
     for url in $dependencies; do
-        logging "info" "Found Dependencies in JSON File: $url" "cyan"
+        logging "info" "Found external JSON File in JSON File: $url" "cyan"
         install_dependencies "$url"
     done
-
-    local os_id
     os_id=$(get_os)
-
-    local target_key="$os_id"
-    local url_of_software_for_this_os
-    url_of_software_for_this_os=$(echo "$pkg_json" | jq -r ".$target_key")
-
-    if [ -n "$url_of_software_for_this_os" ]; then
-        logging "info" "Found Dependencies in JSON File: $url_of_software_for_this_os" "cyan"
+    target_key="$os_id"
+    result=$(echo "$pkg_json" | jq ". | has(\"$target_key\")")
+    if [ "$result" == "true" ]; then
+        logging "info" "Found dependencies url in JSON File: $url_of_software_for_this_os" "cyan"
         download_and_install "$url_of_software_for_this_os"
     else
-        local main_url
         main_url=$(echo "$pkg_json" | jq -r '.url')
-        logging "info" "Found Dependencies in JSON File: $main_url" "cyan"
+        logging "info" "Found dependencies url in JSON File: $main_url" "cyan"
         download_and_install "$main_url"
     fi
-
-    logging "step" "Running setup script for '$url2'..." "cyan"
-
-    local runscript=true
-    local scripts
-    scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { printf "\e[31m[!]\e[0m Skip this because there is no setup script.\n" "red"; runscript=false; }
-
+    logging "step" "Running setup script for '$package_name'..." "purple"
+    runscript=true
+    scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { printf "\e[31m[!]\e[0m Skip this because there is no setup script.\n"; runscript=false; }
     case $runscript in
         true)
             for script in $scripts; do
-                logging "step" "Running setup script: '$script'..." "cyan"
+                logging "step" "Running setup script: '$script'..." "purple"
                 eval "$script"
             done
             ;;
         *)
-            logging "step" "Skip Running Install script: all script" "yellow"
+            logging "step" "Skip Running Install script." "yellow"
             ;;
     esac
+
 }
 
 get_os() {
