@@ -1,37 +1,21 @@
 #!/bin/bash
 
-cateyeversion="5.0.3"
-cateyechanges="\e[32m[+]\e[0m Added option to customize the Kamu Package JSON to allow installation of different versions of software depending on the environment. We also released the Cateye Development Kit built-in for Cateye to more easily make software compatible with Cateye.\n"
+cateyeversion="5.1.0"
+cateyechanges="\e[32m[+]\e[0m Code improvements and bug fixes\n"
 
 # Check if running with sudo
-if [ $EUID -ne 0 ]; then
+if [ "$EUID" -ne 0 ]; then
     echo "This script must be run as root" 
     exit 1
 fi
 
 # Extract command and package name from argument
-command=$1
+command="$1"
 
 download_and_install() {
-    url2=$1
-    printf "\e[35m [+]\e[0m download $url2\n"
-    filename2=$(basename "$url2")
-    curl -LO "$url2" || { printf "\e[31m [!]\e[0m Failed to download: $url2\n"; exit 1; }
-    printf "\e[35m [+]\e[0m unzip: $filename2\n"
-    tar -xzf "$filename2" || { printf "\e[31m [!]\e[0m Failed to extract $filename2\n"; rm "$filename2"; exit 1; }
-    rm "$filename2"
-    # Assuming the extracted folder contains binaries to add to system bin directory
-    printf "\e[32m [+]\e[0m installing file: $filename2\n"
-    sudo cp -r "./$package_name2" "/usr/local/bin/"
-    rm "./$package_name2"
-    printf "\e[32m [+]\e[0m setting file: $filename2\n"
-    chmod +x "/usr/local/bin/$package_name2"
-    printf "\e[34m[+]\e[0m installed: $package_name2\n"
-}
-
-download_and_install_main() {
-    url=$1
+    local url="$1"
     printf "\e[35m [+]\e[0m download $url\n"
+    local filename
     filename=$(basename "$url")
     curl -LO "$url" || { printf "\e[31m [!]\e[0m Failed to download: $url\n"; exit 1; }
     printf "\e[35m [+]\e[0m unzip: $filename\n"
@@ -47,85 +31,66 @@ download_and_install_main() {
 }
 
 install_dependencies() {
-
-    pkg_json2=$(curl -sS "$json_url2") || { printf "\e[31m [!]\e[0m Failed to retrieve JSON File from $1\n"; exit 1; }
-    package_name2=$(echo "$pkg_json2" | jq -r '.name')
-    dependencies2=$(echo "$pkg_json2" | jq -r '.dependencies | to_entries[] | .value')
-    for url2 in $dependencies2; do
-        printf "\e[34m[+]\e[0m Found Dependencies in JSON File: $url2\n"
-        install_dependencies "$url2"
+    local json_url="$1"
+    local pkg_json
+    pkg_json=$(curl -sS "$json_url") || { printf "\e[31m [!]\e[0m Failed to retrieve JSON File from $json_url\n"; exit 1; }
+    local package_name
+    package_name=$(echo "$pkg_json" | jq -r '.name')
+    local dependencies
+    dependencies=$(echo "$pkg_json" | jq -r '.dependencies | to_entries[] | .value')
+    for url in $dependencies; do
+        printf "\e[34m[+]\e[0m Found Dependencies in JSON File: $url\n"
+        install_dependencies "$url"
     done
 
+    local os_id
     os_id=$(get_os)
 
-    # 確認したいキー
-    target_key="$os_id"
+    local target_key="$os_id"
+    local url_of_software_for_this_os
+    url_of_software_for_this_os=$(echo "$pkg_json" | jq -r ".$target_key")
 
-    # jqを使用して、指定したキーがJSONデータ内に存在するか確認
-    result=$(echo "$pkg_json" | jq ". | has(\"$target_key\")")
-
-    # jqを使用して、指定したキーがJSONデータ内に存在するか確認
-    if [ "$result" == "true" ]; then
-        
+    if [ -n "$url_of_software_for_this_os" ]; then
         printf "\e[34m[+]\e[0m Found Dependencies in JSON File: $url_of_software_for_this_os\n"
         download_and_install "$url_of_software_for_this_os"
-
     else
-
-        main_url2=$(echo "$pkg_json2" | jq -r '.url')
-        printf "\e[34m[+]\e[0m Found Dependencies in JSON File: $main_url2\n"
-        download_and_install "$main_url2"
-
+        local main_url
+        main_url=$(echo "$pkg_json" | jq -r '.url')
+        printf "\e[34m[+]\e[0m Found Dependencies in JSON File: $main_url\n"
+        download_and_install "$main_url"
     fi
 
     printf "\e[34m==>\e[0m Running setup script for '$url2'...\n"
 
-    runscript2=true
+    local runscript=true
+    local scripts
+    scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { printf "\e[31m[!]\e[0m Skip this because there is no setup script.\n"; runscript=false; }
 
-    scripts2=$(echo "$pkg_json2" | jq -r '.script | to_entries[] | .value') || { printf "\e[31m[!]\e[0m Skip this because there is no setup script.\n";runscript2=false; }
-
-    case $runscript2 in
-
-        "true")
-
-            for script2 in $scripts2; do
-                printf "\e[34m[+]\e[0m Script: $script2\n"
-                eval "$script2"
+    case $runscript in
+        true)
+            for script in $scripts; do
+                printf "\e[34m[+]\e[0m Script: $script\n"
+                eval "$script"
             done
-
             ;;
-
         *)
-
-            printf "\e[34m==>\e[0m Skip Running Install script.\n"; 
-
+            printf "\e[34m==>\e[0m Skip Running Install script.\n"
             ;;
-        
     esac
-
-
 }
 
 get_os() {
-
-    os_type="other"
-
-    # OSの種類を取得
+    local os_type="other"
     if [[ "$(uname)" == "Darwin" ]]; then
         os_type="macos"
     elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]]; then
         os_type="linux"
-    else
-        os_type="other"
     fi
 
-    os_version="unknown"
-
-    # macOSの場合、バージョンを取得
+    local os_version="unknown"
     if [[ "$os_type" == "macos" ]]; then
         os_version=$(sw_vers -productVersion)
         os_version=$(echo "$os_version" | awk -F. '{print $1}')
-    # Linuxの場合、/etc/os-releaseからバージョンを取得
     elif [[ "$os_type" == "linux" ]]; then
         if [ -e /etc/os-release ]; then
             os_version=$(grep "VERSION_ID" /etc/os-release | cut -d '"' -f 2)
@@ -137,19 +102,17 @@ get_os() {
     fi
 
     echo "$os_type$os_version"
-
 }
 
 get_latest_version() {
+    local latest_version
     latest_version=$(curl -sS https://dl.kamu.jp/cateye/version.html)
     echo "$latest_version"
 }
 
 case "$command" in
     "update")
-
         latest_version=$(get_latest_version)
-
         if [[ "$cateyeversion" == "$latest_version" ]]; then
             echo "cateye V$cateyeversion (Up to date)"
             printf "\e[31m[!] No update. \e[0m\n"
@@ -162,224 +125,124 @@ case "$command" in
             chmod +x "$current_script"
             echo "Updated successfully."
         fi
-
-        exit 0
         ;;
-
     "version")
-
         latest_version=$(get_latest_version)
         os_id=$(get_os)
-
         if [[ "$cateyeversion" == "$latest_version" ]]; then
             echo "cateye V$cateyeversion (Up to date)"
         else
             echo "cateye V$cateyeversion (latest: V$latest_version)"
         fi
-
         printf "\e[34m==>\e[0m OS\n"
         echo "$os_id"
-
         printf "\e[34m==>\e[0m PATH of Cateye\n"
         echo "$0"
-
         printf "\e[34m==>\e[0m Changes of This version\n"
         printf "$cateyechanges"
-
-        exit 0
         ;;
-
     "install")
-
-        printf "\e[33m[-]\e[0m Checking arguments...\n"
-
         if [ -n "$2" ]; then
-
             printf "\e[34m[+]\e[0m The number of arguments is normal. Start the installation.\n"
-            
         else
             printf "\e[31m[!]\e[0m Not enough arguments\n"
             exit 1
         fi
 
         os_id=$(get_os)
-
-        package_name=$2
-
+        package_name="$2"
         printf "\e[34m==>\e[0m Running...\n"
-
-        # Step 1: Connect to server and retrieve pkg.json
         json_url="https://dl.kamu.jp/$package_name/pkg.json"
         pkg_json=$(curl -sS "$json_url") || { printf "\e[31m [!]\e[0m Failed to retrieve JSON File from $json_url\n"; exit 1; }
-
-        # Step 2: Download and add dependencies to system bin directory
         dependencies=$(echo "$pkg_json" | jq -r '.dependencies | to_entries[] | .value')
-        for json_url2 in $dependencies; do
-            printf "\e[34m[+]\e[0m Found external JSON File in JSON File: $json_url2\n"
-            install_dependencies "$json_url2"
+        for url in $dependencies; do
+            printf "\e[34m[+]\e[0m Found external JSON File in JSON File: $url\n"
+            install_dependencies "$url"
         done
-
-
-
         os_id=$(get_os)
-
-        # 確認したいキー
         target_key="$os_id"
-
-        # jqを使用して、指定したキーがJSONデータ内に存在するか確認
         result=$(echo "$pkg_json" | jq ". | has(\"$target_key\")")
-
         if [ "$result" == "true" ]; then
-            
             printf "\e[34m[+]\e[0m Found Main url in JSON File: $url_of_software_for_this_os\n"
             download_and_install "$url_of_software_for_this_os"
-
         else
-
             main_url=$(echo "$pkg_json" | jq -r '.url')
             printf "\e[34m[+]\e[0m Found Main url in JSON File: $main_url\n"
-            download_and_install_main "$main_url"
-
+            download_and_install "$main_url"
         fi
-
-        
-
-        # Step 4: Running Install script
         printf "\e[34m==>\e[0m Running setup script for '$package_name'...\n"
-
         runscript=true
-
-        scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { printf "\e[31m[!]\e[0m Skip this because there is no setup script.\n";runscript=false; }
-
+        scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { printf "\e[31m[!]\e[0m Skip this because there is no setup script.\n"; runscript=false; }
         case $runscript in
-
-            "true")
-
+            true)
                 for script in $scripts; do
                     printf "\e[34m[+]\e[0m Script: $script\n"
                     eval "$script"
                 done
-
                 ;;
-
             *)
-
-                printf "\e[34m==>\e[0m Skip Running Install script.\n"; 
-
+                printf "\e[34m==>\e[0m Skip Running Install script.\n"
                 ;;
-            
         esac
-
         printf "\e[34m==>\e[0m Done.\n"
-
-        # After installation, check if update is needed
         latest_version=$(get_latest_version)
         if [[ "$cateyeversion" != "$latest_version" ]]; then
             printf "\e[33m[-]\e[0m A newer version is available: V$latest_version\n"
             printf "\e[33m[-]\e[0m Consider running: sudo cateye update\n"
         fi
-
         printf "\e[34m[+]\e[0m Installation of $package_name and that dependencies completed successfully\n"
-        
         ;;
-
     "url")
-
-        package_name=$2
-
-        printf "\e[33m[-]\e[0m Checking arguments...\n"
-
-        if [ -n "$2" ]; then
-
-            if [ -n "$3" ]; then
-                printf "\e[34m[+]\e[0m The number of arguments is normal. Start the installation from the URL.\n"
-            else
-                printf "\e[31m[!]\e[0m Not enough arguments\n"
-                exit 1
-            fi
-            
+        package_name="$2"
+        if [ -n "$2" ] && [ -n "$3" ]; then
+            printf "\e[34m[+]\e[0m The number of arguments is normal. Start the installation from the URL.\n"
         else
             printf "\e[31m[!]\e[0m Not enough arguments\n"
             exit 1
         fi
-
-        package_url=$3
-
+        package_url="$3"
         printf "\e[34m==>\e[0m Running...\n"
-
-        json_url=$package_url
+        json_url="$package_url"
         pkg_json=$(curl -sS "$json_url") || { printf "\e[31m [!]\e[0m Failed to retrieve JSON File from $json_url\n"; exit 1; }
-
-        # Step 2: Download and add dependencies to system bin directory
         dependencies=$(echo "$pkg_json" | jq -r '.dependencies | to_entries[] | .value')
-        for json_url2 in $dependencies; do
-            printf "\e[34m[+]\e[0m Found external JSON File in JSON File: $json_url2\n"
-            install_dependencies "$json_url2"
+        for url in $dependencies; do
+            printf "\e[34m[+]\e[0m Found external JSON File in JSON File: $url\n"
+            install_dependencies "$url"
         done
-
         os_id=$(get_os)
-
-        # 確認したいキー
         target_key="$os_id"
-
-        # jqを使用して、指定したキーがJSONデータ内に存在するか確認
         result=$(echo "$pkg_json" | jq ". | has(\"$target_key\")")
-
-        # jqを使用して、指定したキーがJSONデータ内に存在するか確認
         if [ "$result" == "true" ]; then
-            
             printf "\e[34m[+]\e[0m Found Main url in JSON File: $url_of_software_for_this_os\n"
             download_and_install "$url_of_software_for_this_os"
-
         else
-
             main_url=$(echo "$pkg_json" | jq -r '.url')
             printf "\e[34m[+]\e[0m Found Main url in JSON File: $main_url\n"
-            download_and_install_main "$main_url"
-
+            download_and_install "$main_url"
         fi
-
-        # Step 4: Running Install script
         printf "\e[34m==>\e[0m Running setup script for '$package_name'...\n"
-
         runscript=true
-
-        scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { printf "\e[31m[!]\e[0m Skip this because there is no setup script.\n";runscript=false; }
-
+        scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { printf "\e[31m[!]\e[0m Skip this because there is no setup script.\n"; runscript=false; }
         case $runscript in
-
-            "true")
-
+            true)
                 for script in $scripts; do
                     printf "\e[34m[+]\e[0m Script: $script\n"
                     eval "$script"
                 done
-
                 ;;
-
             *)
-
-                printf "\e[34m==>\e[0m Skip Running Install script.\n"; 
-
+                printf "\e[34m==>\e[0m Skip Running Install script.\n"
                 ;;
-            
         esac
-
         printf "\e[34m==>\e[0m Done.\n"
-
-        # After installation, check if update is needed
         latest_version=$(get_latest_version)
         if [[ "$cateyeversion" != "$latest_version" ]]; then
             printf "\e[33m[-]\e[0m A newer version is available: V$latest_version\n"
             printf "\e[33m[-]\e[0m Consider running: sudo cateye update\n"
         fi
-
         printf "\e[34m[+]\e[0m Installation of $package_name and that dependencies completed successfully\n"
-
         ;;
-
     *)
-
         printf "\e[31m[!]\e[0m Unknown command\n"
         echo " "
         printf "\e[34m==>\e[0m Usage\n"
@@ -391,7 +254,5 @@ case "$command" in
         echo " sudo cateye url [package name] [url of Kamu Package JSON]"
         echo "Show version:"
         echo " sudo cateye version"
-
         ;;
-        
 esac
