@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="5.23.0"
+cateyeversion="5.24.0"
 cateyechanges="Added doctor command"
 
 # Extract command and package name from argument
@@ -405,7 +405,7 @@ case "$command" in
         if command -v jq &> /dev/null; then
             printf "\e[32m[\xE2\x9C\x94]\e[0m jq\n"
         else
-            logging "error" "jq"
+            printf "\e[31m[\xE2\x9C\x98]\e[0m jq\n"
             printf "    \e[31m[\xE2\x9C\x98]\e[0m jq is not installed.\n"
             errors=$((errors + 1))
         fi
