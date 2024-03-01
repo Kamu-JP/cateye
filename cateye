@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="5.19.0"
+cateyeversion="5.20.0"
 cateyechanges="Added symbol to logging"
 
 # Extract command and package name from argument
@@ -21,7 +21,6 @@ download_and_install() {
     rm "./$package_name"
     logging "info" "Setting file: $filename"
     chmod +x "/usr/local/bin/$package_name"
-    logging "checkmark" "installed: $package_name"
 }
 
 logging() {
@@ -141,6 +140,7 @@ install_dependencies() {
         logging "info" "Found dependencies url in JSON File: $main_url"
         download_and_install "$main_url"
     fi
+    logging "checkmark" "installed dependencies: $package_name"
     logging "step" "Running setup script for '$package_name'..." 
     runscript=true
     allow_running_script=true
@@ -332,10 +332,12 @@ case "$command" in
         if [ "$result" == "true" ]; then
             logging "info" "Found Main url in JSON File: $url_of_software_for_this_os"
             download_and_install "$url_of_software_for_this_os"
+            logging "checkmark" "installed: $package_name"
         else
             main_url=$(echo "$pkg_json" | jq -r '.url')
             logging "info" "Found Main url in JSON File: $main_url"
             download_and_install "$main_url"
+            logging "checkmark" "installed: $package_name"
         fi
 
         logging "step" "Running setup script for '$package_name'..." 
