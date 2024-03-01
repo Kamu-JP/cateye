@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cateyeversion="5.2.1"
-cateyechanges="Improved code visibility\n"
+cateyeversion="5.3.0"
+cateyechanges="Built-in Cateye Development Kit\n"
 
 # Check if running with sudo
 if [ "$EUID" -ne 0 ]; then
@@ -266,6 +266,50 @@ case "$command" in
         fi
         logging "info" "Installation of $package_name and that dependencies completed successfully"
         ;;
+    "cedk")
+        logging "step" "Running Cateye Development Kit..."
+        echo "Cateye Development Kit"
+        echo "-------------------------"
+        echo "Please enter the following information:"
+
+        read -p "Package Name: " package_name
+        read -p "Package URL: " package_url
+        read -p "macOS 14 URL (optional): " macos14_url
+        read -p "Linux 38 URL (optional): " linux38_url
+
+        echo "Dependencies (separated by space, press enter when done):"
+        while read -r line; do
+            dependencies+=("$line")
+        done
+
+        echo "Scripts (separated by space, press enter when done):"
+        while read -r line; do
+            scripts+=("$line")
+        done
+
+        cat <<EOF > kamu_package.json
+{
+  "name": "$package_name",
+  "url": "$package_url",
+  "macos14": "$macos14_url",
+  "linux38": "$linux38_url",
+  "dependencies": [
+    $(printf '"%s",' "${dependencies[@]}")
+  ],
+  "script": [
+    $(printf '"%s",' "${scripts[@]}")
+  ]
+}
+EOF
+        
+        logging "info" "Kamu Package JSON has been created."
+        logging "info" "Please upload kamu_package.json to your server and run the following command."
+        logging "info" "sudo cateye url [package name] [url of kamu_package.json]"
+
+        logging "step" "Done."
+
+        ;;
+
     *)
         logging "error" "Unknown command"
         echo " "
