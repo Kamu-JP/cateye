@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="5.15.0"
+cateyeversion="5.16.0"
 cateyechanges="Added symbol to logging"
 
 # Extract command and package name from argument
@@ -90,13 +90,13 @@ logging() {
             printf "\e[$color_code[-]\e[0m $message\n"
             ;;
         "error")
-            printf "\e[$color_code[\xE2\x9C\x98]\e[0m $message\n"
+            printf "\e[$color_code\xE2\x9C\x98\e[0m $message\n"
             ;;
         "checkmark")
             printf "\e[$color_code\xE2\x9C\x94\e[0m $message\n"
             ;;
         "xmark")
-            printf "\e[$color_code[\xE2\x9C\x98]\e[0m $message\n"
+            printf "\e[$color_code\xE2\x9C\x98\e[0m $message\n"
             ;;
         *)
             printf "\e[$color_code[!]\e[0m Internal script error, unknown mode: $mode\n"
