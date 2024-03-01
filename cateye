@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="5.11.0"
+cateyeversion="5.12.0"
 cateyechanges="Added symbol to logging"
 
 # Extract command and package name from argument
@@ -291,7 +291,7 @@ case "$command" in
                 logging "step" "Skip Running Install script." 
                 ;;
         esac
-        logging "step" "Done." 
+        logging "checkmark" "Done." 
         latest_version=$(get_latest_version)
         if [[ "$cateyeversion" != "$latest_version" ]]; then
             logging "warn" "A newer version is available: V$latest_version" 
@@ -302,8 +302,6 @@ case "$command" in
             logging "warn" "Skiped setup script, because you answered 'n'. if you want to run the setup script, run the following command." 
             logging "warn" "cateye install $package_name" 
         fi
-
-        logging "checkmark" "Installation of $package_name and that dependencies completed successfully"
 
         ;;
     "url")
@@ -367,7 +365,7 @@ case "$command" in
                 logging "step" "Skip Running Install script." 
                 ;;
         esac
-        logging "step" "Done." 
+        logging "checkmark" "Done." 
         latest_version=$(get_latest_version)
         if [[ "$cateyeversion" != "$latest_version" ]]; then
             logging "warn" "A newer version is available: V$latest_version" 
@@ -379,7 +377,6 @@ case "$command" in
             logging "warn" "cateye url $package_url" 
         fi
 
-        logging "checkmark" "Installation of $package_name and that dependencies completed successfully"
         ;;
 
     "cedk")
@@ -418,7 +415,7 @@ EOF
         logging "info" "Please upload kamu_package.json to your server and run the following command."
         logging "info" "cateye url [package name] [url of kamu_package.json]"
 
-        logging "step" "Done."
+        logging "checkmark" "Done."
 
         ;;
 
