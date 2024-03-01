@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="5.10.0"
+cateyeversion="5.11.0"
 cateyechanges="Added symbol to logging"
 
 # Extract command and package name from argument
@@ -21,8 +21,7 @@ download_and_install() {
     rm "./$package_name"
     logging "info" "Setting file: $filename"
     chmod +x "/usr/local/bin/$package_name"
-    printf "\e[34m[+]\e[0m installed: $package_name\n"
-    logging "info" "installed: $package_name"
+    logging "step" "installed: $package_name"
 }
 
 logging() {
