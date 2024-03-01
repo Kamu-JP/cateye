@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="5.9.0"
+cateyeversion="5.10.0"
 cateyechanges="Added symbol to logging"
 
 # Extract command and package name from argument
@@ -205,7 +205,7 @@ case "$command" in
         latest_version=$(get_latest_version)
         if [[ "$cateyeversion" == "$latest_version" ]]; then
             echo "Current: cateye V$cateyeversion (Up to date)"
-            logging "info" "No update."
+            logging "checkmark" "No update."
         else
             echo "Current: cateye V$cateyeversion (latest: V$latest_version)"
             logging "info" "Updating Cateye: $current_script"
