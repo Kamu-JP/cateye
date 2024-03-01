@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="5.22.0"
+cateyeversion="5.23.0"
 cateyechanges="Added doctor command"
 
 # Extract command and package name from argument
@@ -390,14 +390,27 @@ case "$command" in
 
         logging "step" "Show result of doctor" 
         latest_version=$(get_latest_version)
+        warnings=0
+        errors=0
+
         if [[ "$cateyeversion" == "$latest_version" ]]; then
             printf "\e[32m[\xE2\x9C\x94]\e[0m cateye V$cateyeversion\n"
         else
             logging "warn" "cateye V$cateyeversion"
             printf "    \e[33m[-]\e[0m A newer version is available: V$latest_version\n"
             printf "    \e[33m[-]\e[0m Consider running: cateye update\n"
+            warnings=$((warnings + 1))
         fi
-        logging "checkmark" "Done." 
+
+        if command -v jq &> /dev/null; then
+            printf "\e[32m[\xE2\x9C\x94]\e[0m jq\n"
+        else
+            logging "error" "jq"
+            printf "    \e[31m[\xE2\x9C\x98]\e[0m jq is not installed.\n"
+            errors=$((errors + 1))
+        fi
+        
+        logging "checkmark" "Finished: $errors errors, $warnings warnings"
 
         ;;
 
