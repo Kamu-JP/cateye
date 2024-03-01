@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cateyeversion="5.8.0"
-cateyechanges="Updated color of logging"
+cateyeversion="5.9.0"
+cateyechanges="Added symbol to logging"
 
 # Extract command and package name from argument
 command="$1"
@@ -59,15 +59,21 @@ logging() {
 
             case $mode in
                 "step")
-                    color_code="35m"
+                    color_code="34m"
                     ;;
                 "info")
-                    color_code="36m"
+                    color_code="32m"
                     ;;
                 "warn")
                     color_code="33m"
                     ;;
                 "error")
+                    color_code="31m"
+                    ;;
+                "checkmark")
+                    color_code="32m"
+                    ;;
+                "xmark")
                     color_code="31m"
                     ;;
             esac
@@ -76,7 +82,7 @@ logging() {
     esac
     case $mode in
         "step")
-            printf "\e[$color_code==>\e[0m $message\n"
+            printf "\e[$color_code>\e[0m $message\n"
             ;;
         "info")
             printf "\e[$color_code[+]\e[0m $message\n"
@@ -85,7 +91,13 @@ logging() {
             printf "\e[$color_code[-]\e[0m $message\n"
             ;;
         "error")
-            printf "\e[$color_code[!]\e[0m $message\n"
+            printf "\e[$color_code[\xE2\x9C\x98]\e[0m $message\n"
+            ;;
+        "checkmark")
+            printf "\e[$color_code[\xE2\x9C\x94]\e[0m $message\n"
+            ;;
+        "xmark")
+            printf "\e[$color_code[\xE2\x9C\x98]\e[0m $message\n"
             ;;
         *)
             printf "\e[$color_code[!]\e[0m Internal script error, unknown mode: $mode\n"
@@ -201,7 +213,7 @@ case "$command" in
             logging "info" "Downloading latest script to $current_script"
             curl -sS -o "$current_script" "https://dl.kamu.jp/cateye/cateye" || { printf "\e[31m[!] Failed to download latest script\e[0m\n"; exit 1; }
             chmod +x "$current_script"
-            logging "info" "Updated successfully."
+            logging "checkmark" "Updated successfully."
         fi
         ;;
     "version")
@@ -221,7 +233,7 @@ case "$command" in
         ;;
     "install")
 
-        if [ -n "$1" ]; then
+        if [ -n "$2" ]; then
             logging "info" "The number of arguments is normal. Start the installation."
         else
             logging "error" "Not enough arguments" 
@@ -292,7 +304,7 @@ case "$command" in
             logging "warn" "cateye install $package_name" 
         fi
 
-        logging "info" "Installation of $package_name and that dependencies completed successfully"
+        logging "checkmark" "Installation of $package_name and that dependencies completed successfully"
 
         ;;
     "url")
@@ -368,7 +380,7 @@ case "$command" in
             logging "warn" "cateye url $package_url" 
         fi
 
-        logging "info" "Installation of $package_name and that dependencies completed successfully"
+        logging "checkmark" "Installation of $package_name and that dependencies completed successfully"
         ;;
 
     "cedk")
