@@ -13,12 +13,6 @@ This is software for installing Kamu Package.
 - macOS Sonoma (Apple silicon), Homebrew 4.2.9
 - Fedora linux 38 (arm64)
 
-## Check the [local version] and [latest version] of Cateye
-
-```zsh
-cateye version
-```
-
 ## Download, Install and Setup Cateye with Homebrew
 
 ### Install homebrew
@@ -43,6 +37,12 @@ brew install cateye
 
 ```zsh
 sudo cateye update
+```
+
+### Ensure that the environment necessary for Cateye to operate is in place
+
+```zsh
+cateye doctor
 ```
 
 ## Install or Update Kamu Package from Kamu Dev With Cateye
