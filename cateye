@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cateyeversion="5.24.0"
-cateyechanges="Added doctor command"
+cateyeversion="5.25.0"
+cateyechanges="Update curl option"
 
 # Extract command and package name from argument
 command="$1"
@@ -11,7 +11,7 @@ download_and_install() {
     logging "info" "Download $url"
     local filename
     filename=$(basename "$url")
-    curl -LO "$url" || { logging "error" "Failed to download: $url" ; exit 1; }
+    curl -s -LO "$url" || { logging "error" "Failed to download: $url" ; exit 1; }
     logging "info" "Unzip: $filename"
     tar -xzf "$filename" || { logging "error" "Failed to extract $filename" ; rm "$filename"; exit 1; }
     rm "$filename"
