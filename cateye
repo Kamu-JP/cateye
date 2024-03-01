@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="5.17.0"
+cateyeversion="5.18.0"
 cateyechanges="Added symbol to logging"
 
 # Extract command and package name from argument
@@ -144,7 +144,7 @@ install_dependencies() {
     logging "step" "Running setup script for '$package_name'..." 
     runscript=true
     allow_running_script=true
-    scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { printf "\e[31m[!]\e[0m Skip this because there is no setup script.\n"; runscript=false; }
+    scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { logging "warn" "Skip this because there is no setup script."; runscript=false; }
     case $runscript in
         true)
 
@@ -268,7 +268,7 @@ case "$command" in
         logging "step" "Running setup script for '$package_name'..." 
         runscript=true
         allow_running_script=true
-        scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { printf "\e[31m[!]\e[0m Skip this because there is no setup script.\n"; runscript=false; }
+        scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { logging "warn" "Skip this because there is no setup script."; runscript=false; }
         case $runscript in
             true)
 
@@ -341,7 +341,7 @@ case "$command" in
         logging "step" "Running setup script for '$package_name'..." 
         runscript=true
         allow_running_script=true
-        scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { printf "\e[31m[!]\e[0m Skip this because there is no setup script.\n"; runscript=false; }
+        scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { logging "warn" "Skip this because there is no setup script."; runscript=false; }
         case $runscript in
             true)
 
@@ -428,9 +428,12 @@ EOF
 
         latest_version=$(get_latest_version)
         if [[ "$cateyeversion" == "$latest_version" ]]; then
-            echo "cateye V$cateyeversion (Up to date)"
+            logging "info" "cateye V$cateyeversion"
+            logging "checkmark" "Up to date."
         else
-            echo "cateye V$cateyeversion (latest: V$latest_version)"
+            logging "info" "cateye V$cateyeversion"
+            logging "warn" "A newer version is available: V$latest_version"
+            logging "warn" "Consider running: cateye update" 
         fi
 
         echo " "
