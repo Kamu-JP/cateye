@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cateyeversion="5.4.3"
-cateyechanges="URL install is now not need to specify the package name!"
+cateyeversion="5.5.0"
+cateyechanges="Added prompt for running setup script"
 
 # Extract command and package name from argument
 command="$1"
@@ -115,13 +115,16 @@ install_dependencies() {
     fi
     logging "step" "Running setup script for '$package_name'..." "purple"
     runscript=true
+    allow_running_script=true
     scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { printf "\e[31m[!]\e[0m Skip this because there is no setup script.\n"; runscript=false; }
     case $runscript in
         true)
+
             for script in $scripts; do
                 logging "step" "Running setup script: '$script'..." "purple"
                 eval "$script"
             done
+
             ;;
         *)
             logging "step" "Skip Running Install script." "yellow"
@@ -200,7 +203,8 @@ case "$command" in
         logging "info" "$cateyechanges" "cyan"
         ;;
     "install")
-        if [ -n "$2" ]; then
+
+        if [ -n "$1" ]; then
             logging "info" "The number of arguments is normal. Start the installation." "cyan"
         else
             logging "error" "Not enough arguments" "red"
@@ -230,13 +234,30 @@ case "$command" in
         fi
         logging "step" "Running setup script for '$package_name'..." "purple"
         runscript=true
+        allow_running_script=true
         scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { printf "\e[31m[!]\e[0m Skip this because there is no setup script.\n"; runscript=false; }
         case $runscript in
             true)
-                for script in $scripts; do
-                    logging "step" "Running setup script: '$script'..." "purple"
-                    eval "$script"
-                done
+
+                read -p "Do you want to run the setup script? [y/n]: " runscript
+                case $runscript in
+                    "y")
+                        runscript=true
+                        for script in $scripts; do
+                            logging "step" "Running setup script: '$script'..." "purple"
+                            eval "$script"
+                        done
+                        ;;
+                    "n")
+                        runscript=false
+                        allow_running_script=false
+                        logging "step" "Skip Running Install script." "yellow"
+                        ;;
+                    *)
+                        logging "error" "Unknown answer, continue the installation with running the setup script." "red"
+                        runscript=true
+                        ;;
+                esac
                 ;;
             *)
                 logging "step" "Skip Running Install script." "yellow"
@@ -248,7 +269,14 @@ case "$command" in
             logging "warn" "A newer version is available: V$latest_version" "yellow"
             logging "warn" "Consider running: cateye update" "yellow"
         fi
+
+        if [ "$allow_running_script" == "true" ]; then
+            logging "warn" "Skiped setup script, because you answered 'n'. if you want to run the setup script, run the following command." "yellow"
+            logging "warn" "cateye install $package_name" "yellow"
+        fi
+
         logging "info" "Installation of $package_name and that dependencies completed successfully" "cyan"
+
         ;;
     "url")
         if [ -n "$2" ]; then
@@ -278,15 +306,34 @@ case "$command" in
             logging "info" "Found Main url in JSON File: $main_url" "cyan"
             download_and_install "$main_url"
         fi
+
         logging "step" "Running setup script for '$package_name'..." "purple"
         runscript=true
+        allow_running_script=true
         scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { printf "\e[31m[!]\e[0m Skip this because there is no setup script.\n"; runscript=false; }
         case $runscript in
             true)
-                for script in $scripts; do
-                    logging "step" "Running setup script: '$script'..." "purple"
-                    eval "$script"
-                done
+
+                read -p "Do you want to run the setup script? [y/n]: " runscript
+                case $runscript in
+                    "y")
+                        runscript=true
+                        for script in $scripts; do
+                            logging "step" "Running setup script: '$script'..." "purple"
+                            eval "$script"
+                        done
+                        ;;
+                    "n")
+                        logging "step" "Skip Running Install script." "yellow"
+                        runscript=false
+                        allow_running_script=false
+                        ;;
+                    *)
+                        logging "error" "Unknown answer, continue the installation with running the setup script." "red"
+                        runscript=true
+                        ;;
+                esac
+
                 ;;
             *)
                 logging "step" "Skip Running Install script." "yellow"
@@ -298,8 +345,15 @@ case "$command" in
             logging "warn" "A newer version is available: V$latest_version" "yellow"
             logging "warn" "Consider running: cateye update" "yellow"
         fi
+
+        if [ "$allow_running_script" == "true" ]; then
+            logging "warn" "Skiped setup script, because you answered 'n'. if you want to run the setup script, run the following command." "yellow"
+            logging "warn" "cateye url $package_url" "yellow"
+        fi
+
         logging "info" "Installation of $package_name and that dependencies completed successfully" "cyan"
         ;;
+
     "cedk")
         logging "step" "Running Cateye Development Kit..."
         echo "Cateye Development Kit"
@@ -341,7 +395,14 @@ EOF
         ;;
 
     *)
-        logging "error" "Unknown command" "red"
+
+        latest_version=$(get_latest_version)
+        if [[ "$cateyeversion" == "$latest_version" ]]; then
+            echo "cateye V$cateyeversion (Up to date)"
+        else
+            echo "cateye V$cateyeversion (latest: V$latest_version)"
+        fi
+
         echo " "
         logging "step" "Usage" "purple"
         echo "Update:"
