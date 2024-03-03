@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="5.28.0"
+cateyeversion="5.28.1"
 cateyechanges="Add progress bar to install command."
 
 # Extract command and package name from argument
@@ -26,10 +26,6 @@ download_and_install() {
 }
 
 logging() {
-    echo "$2"
-}
-
-logging_color_mark() {
 
     local mode="$1"
     local message="$2"
