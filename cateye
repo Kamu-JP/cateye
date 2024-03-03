@@ -1,29 +1,35 @@
 #!/bin/bash
 
-cateyeversion="5.26.0"
-cateyechanges="Remove cedk command."
+cateyeversion="5.28.0"
+cateyechanges="Add progress bar to install command."
 
 # Extract command and package name from argument
 command="$1"
 
+# Check if running with sudo
+if [ $EUID -ne 0 ]; then
+    echo "Update command is must be run as root" 
+    exit 1
+fi
+
 download_and_install() {
     local url="$1"
-    logging "info" "Download $url"
     local filename
     filename=$(basename "$url")
     curl -s -LO "$url" || { logging "error" "Failed to download: $url" ; exit 1; }
-    logging "info" "Unzip: $filename"
     tar -xzf "$filename" || { logging "error" "Failed to extract $filename" ; rm "$filename"; exit 1; }
     rm "$filename"
     # Assuming the extracted folder contains binaries to add to system bin directory
-    logging "info" "Installing file: $filename"
     sudo cp -r "./$package_name" "/usr/local/bin/" || { logging "error" "Failed to install $filename" ; rm "./$package_name"; exit 1; }
     rm "./$package_name"
-    logging "info" "Setting file: $filename"
     chmod +x "/usr/local/bin/$package_name"
 }
 
 logging() {
+    echo "$2"
+}
+
+logging_color_mark() {
 
     local mode="$1"
     local message="$2"
@@ -104,6 +110,62 @@ logging() {
     esac
 }
 
+loadbar() {
+    local pid=$!
+    local delay=0.75
+    local spinstr='|/-\'
+    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
+        local temp=${spinstr#?}
+        printf "\e[32m [%c]  \e[0m" "$spinstr"
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+        printf "\b\b\b\b\b\b"
+    done
+    printf "    \b\b\b\b"
+}
+
+draw_progress_bar() {
+
+    # 完了した場所の割合 (0.0 - 1.0)
+    progress=$1
+
+    # 実行している処理
+    task=$2
+
+    # プログレスバーの幅
+    BAR_WIDTH=50
+
+    local width=50
+    local progress=$1
+
+    # プログレスバーの幅を計算
+    local completed_width=$(printf "%.0f" $(echo "$progress * $width" | bc))
+
+    # プログレスバーの表示
+    printf "\r("
+
+    # 完了した部分を青で表示
+    for ((i = 0; i < completed_width; i++)); do
+        printf "\033[44m \033[m"
+    done
+
+    # 未完了の部分をマゼンタで表示
+    for ((i = completed_width; i < width; i++)); do
+        printf "\033[45m \033[m"
+    done
+
+    printf ")"
+
+    # パーセントの表示
+    percent=$(printf "%.0f" $(echo "$progress * 100" | bc))
+    printf " %3d%%" $percent
+
+    printf " | $task"
+
+    printf " "
+
+}
+
 install_dependencies() {
 
     local package_url
@@ -126,22 +188,17 @@ install_dependencies() {
     package_name=$(echo "$pkg_json" | jq -r '.name')
     dependencies=$(echo "$pkg_json" | jq -r '.dependencies | to_entries[] | .value')
     for url in $dependencies; do
-        logging "info" "Found external JSON File in JSON File: $url"
         install_dependencies "$url"
     done
     os_id=$(get_os)
     target_key="$os_id"
     result=$(echo "$pkg_json" | jq ". | has(\"$target_key\")")
     if [ "$result" == "true" ]; then
-        logging "info" "Found dependencies url in JSON File: $url_of_software_for_this_os"
         download_and_install "$url_of_software_for_this_os"
     else
         main_url=$(echo "$pkg_json" | jq -r '.url')
-        logging "info" "Found dependencies url in JSON File: $main_url"
         download_and_install "$main_url"
     fi
-    logging "checkmark" "installed dependencies: $package_name"
-    logging "step" "Running setup script for '$package_name'..." 
     runscript=true
     allow_running_script=true
     scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { logging "warn" "Skip this because there is no setup script."; runscript=false; }
@@ -149,17 +206,13 @@ install_dependencies() {
         true)
 
             for script in $scripts; do
-                logging "step" "Running setup script: '$script'..." 
                 eval "$script"
             done
 
             ;;
         *)
-            logging "step" "Skip Running Install script." 
             ;;
     esac
-
-    logging "checkmark" "Installed dependencies: $package_name"
 
 }
 
@@ -194,14 +247,108 @@ get_latest_version() {
     echo "$latest_version"
 }
 
-case "$command" in
-    "update")
+install_software() {
 
-        # Check if running with sudo
-        if [ $EUID -ne 0 ]; then
-            echo "Update command is must be run as root" 
+    local os_id
+    local package_name
+    local json_url
+    local pkg_json
+
+    if [ -n "$1" ]; then
+        if [ -n "$2" ]; then
+            logging "checkmark" "The number of arguments is normal. Start the installation."
+        else
+            logging "error" "Not enough arguments" 
             exit 1
         fi
+    else
+        logging "error" "Not enough arguments" 
+        exit 1
+    fi
+
+    case $2 in
+        "kamujp")
+            
+            os_id=$(get_os)
+            package_name="$1"
+            logging "step" "Start the installation." 
+            draw_progress_bar 0 "Download JSON File"
+            json_url="https://dl.kamu.jp/$package_name/pkg.json"
+            pkg_json=$(curl -sS "$json_url") || { logging "error" "Failed to retrieve JSON File from $json_url"; exit 1; }
+            draw_progress_bar 1 "Download JSON File"
+
+            ;;
+        "other")
+        
+            os_id=$(get_os)
+            logging "step" "Start the installation." 
+            draw_progress_bar 0 "Download JSON File"
+            json_url="$1"
+            pkg_json=$(curl -sS "$json_url") || { logging "error" "Failed to retrieve JSON File from $json_url"; exit 1; }
+            draw_progress_bar 1 "Download JSON File"
+            package_name=$(echo "$pkg_json" | jq -r '.name')
+
+            ;;
+    esac
+
+    printf "\n"
+    dependencies=$(echo "$pkg_json" | jq -r '.dependencies | to_entries[] | .value')
+    index_ins_dep=0
+
+    for url in $dependencies; do
+        index_ins_dep+=1
+        draw_progress_bar 0 "Install dependencies: $url"
+        install_dependencies "$url"
+        draw_progress_bar 1 "Install dependencies: $url"
+        printf "\n"
+    done
+    os_id=$(get_os)
+    target_key="$os_id"
+    result=$(echo "$pkg_json" | jq ". | has(\"$target_key\")")
+    draw_progress_bar 0 "Install Main software"
+    if [ "$result" == "true" ]; then
+        download_and_install "$url_of_software_for_this_os"
+    else
+        main_url=$(echo "$pkg_json" | jq -r '.url')
+        download_and_install "$main_url"
+    fi
+    draw_progress_bar 1 "Install Main software"
+    printf "\n"
+    draw_progress_bar 0 "Running setup script"
+    runscript=true
+    allow_running_script=true
+    scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { logging "warn" "Skip this because there is no setup script."; runscript=false; }
+    case $runscript in
+        true)
+            runscript=true
+            for script in $scripts; do
+                eval "$script"
+            done
+            ;;
+        *)
+            logging "step" "Skip Running Install script." 
+            ;;
+    esac
+    draw_progress_bar 1 "Running setup script"
+    printf "\n"
+
+    logging "checkmark" "Done." 
+
+    latest_version=$(get_latest_version)
+    if [[ "$cateyeversion" != "$latest_version" ]]; then
+        logging "warn" "A newer version is available: V$latest_version" 
+        logging "warn" "Consider running: cateye update" 
+    fi
+
+    if [ "$allow_running_script" == "false" ]; then
+        logging "warn" "Skiped setup script, because you answered 'n'. if you want to run the setup script, run the following command." 
+        logging "warn" "cateye install $package_name" 
+    fi
+    
+}
+
+case "$command" in
+    "update")
 
         latest_version=$(get_latest_version)
         if [[ "$cateyeversion" == "$latest_version" ]]; then
@@ -235,154 +382,16 @@ case "$command" in
         logging "step" "Update of current version" 
         logging "info" "$cateyechanges"
         ;;
+
     "install")
 
-        if [ -n "$2" ]; then
-            logging "checkmark" "The number of arguments is normal. Start the installation."
-        else
-            logging "error" "Not enough arguments" 
-            exit 1
-        fi
-
-        os_id=$(get_os)
-        package_name="$2"
-        logging "step" "Start the installation." 
-        json_url="https://dl.kamu.jp/$package_name/pkg.json"
-        pkg_json=$(curl -sS "$json_url") || { logging "error" "Failed to retrieve JSON File from $json_url"; exit 1; }
-        dependencies=$(echo "$pkg_json" | jq -r '.dependencies | to_entries[] | .value')
-        for url in $dependencies; do
-            logging "info" "Found external JSON File in JSON File: $url"
-            install_dependencies "$url"
-        done
-        os_id=$(get_os)
-        target_key="$os_id"
-        result=$(echo "$pkg_json" | jq ". | has(\"$target_key\")")
-        if [ "$result" == "true" ]; then
-            logging "info" "Found Main url in JSON File: $url_of_software_for_this_os"
-            download_and_install "$url_of_software_for_this_os"
-        else
-            main_url=$(echo "$pkg_json" | jq -r '.url')
-            logging "info" "Found Main url in JSON File: $main_url"
-            download_and_install "$main_url"
-        fi
-        logging "step" "Running setup script for '$package_name'..." 
-        runscript=true
-        allow_running_script=true
-        scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { logging "warn" "Skip this because there is no setup script."; runscript=false; }
-        case $runscript in
-            true)
-
-                read -p "Do you want to run the setup script? [y/n]: " isRunScript
-                case $isRunScript in
-                    y)
-                        runscript=true
-                        for script in $scripts; do
-                            logging "step" "Running setup script: '$script'..." 
-                            eval "$script"
-                        done
-                        ;;
-                    n)
-                        runscript=false
-                        allow_running_script=false
-                        logging "step" "Skip Running Install script." 
-                        ;;
-                    *)
-                        logging "error" "Unknown answer, continue the installation with running the setup script." 
-                        runscript=true
-                        ;;
-                esac
-                ;;
-            *)
-                logging "step" "Skip Running Install script." 
-                ;;
-        esac
-        logging "checkmark" "Done." 
-        latest_version=$(get_latest_version)
-        if [[ "$cateyeversion" != "$latest_version" ]]; then
-            logging "warn" "A newer version is available: V$latest_version" 
-            logging "warn" "Consider running: cateye update" 
-        fi
-
-        if [ "$allow_running_script" == "false" ]; then
-            logging "warn" "Skiped setup script, because you answered 'n'. if you want to run the setup script, run the following command." 
-            logging "warn" "cateye install $package_name" 
-        fi
+        install_software "$2" "kamujp"
 
         ;;
+
     "url")
-        if [ -n "$2" ]; then
-            logging "info" "The number of arguments is normal. Start the installation from the URL."
-        else
-            logging "error" "Not enough arguments" 
-            exit 1
-        fi
-        package_url="$2"
-        logging "step" "Running from the URL." 
-        json_url="$package_url"
-        pkg_json=$(curl -sS "$json_url") || { logging "error" "Failed to retrieve JSON File from $json_url" ; exit 1; }
-        package_name=$(echo "$pkg_json" | jq -r '.name')
-        dependencies=$(echo "$pkg_json" | jq -r '.dependencies | to_entries[] | .value')
-        for url in $dependencies; do
-            logging "info" "Found external JSON File in JSON File: $url"
-            install_dependencies "$url"
-        done
-        os_id=$(get_os)
-        target_key="$os_id"
-        result=$(echo "$pkg_json" | jq ". | has(\"$target_key\")")
-        if [ "$result" == "true" ]; then
-            logging "info" "Found Main url in JSON File: $url_of_software_for_this_os"
-            download_and_install "$url_of_software_for_this_os"
-            logging "checkmark" "installed: $package_name"
-        else
-            main_url=$(echo "$pkg_json" | jq -r '.url')
-            logging "info" "Found Main url in JSON File: $main_url"
-            download_and_install "$main_url"
-            logging "checkmark" "installed: $package_name"
-        fi
 
-        logging "step" "Running setup script for '$package_name'..." 
-        runscript=true
-        allow_running_script=true
-        scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { logging "warn" "Skip this because there is no setup script."; runscript=false; }
-        case $runscript in
-            true)
-
-                read -p "Do you want to run the setup script? [y/n]: " isRunScript
-                case $isRunScript in
-                    "y")
-                        runscript=true
-                        for script in $scripts; do
-                            logging "step" "Running setup script: '$script'..." 
-                            eval "$script"
-                        done
-                        ;;
-                    "n")
-                        logging "step" "Skip Running Install script." 
-                        runscript=false
-                        allow_running_script=false
-                        ;;
-                    *)
-                        logging "error" "Unknown answer, continue the installation with running the setup script." 
-                        runscript=true
-                        ;;
-                esac
-
-                ;;
-            *)
-                logging "step" "Skip Running Install script." 
-                ;;
-        esac
-        logging "checkmark" "Done." 
-        latest_version=$(get_latest_version)
-        if [[ "$cateyeversion" != "$latest_version" ]]; then
-            logging "warn" "A newer version is available: V$latest_version" 
-            logging "warn" "Consider running: cateye update" 
-        fi
-
-        if [ "$allow_running_script" == "false" ]; then
-            logging "warn" "Skiped setup script, because you answered 'n'. if you want to run the setup script, run the following command." 
-            logging "warn" "cateye url $package_url" 
-        fi
+        install_software "$2" "other"
 
         ;;
 
@@ -429,15 +438,15 @@ case "$command" in
         echo " "
         logging "step" "Usage" 
         echo "Update:"
-        echo " cateye update"
+        echo " sudo cateye update"
         echo "Run doctor:"
-        echo " cateye doctor"
+        echo " sudo cateye doctor"
         echo "Install from Kamu Dev:"
-        echo " cateye install [package name]"
+        echo " sudo cateye install [package name]"
         echo "Install from Other Site:"
-        echo " cateye url [url of Kamu Package JSON]"
+        echo " sudo cateye url [url of Kamu Package JSON]"
         echo "Show version:"
-        echo " cateye version"
+        echo " sudo cateye version"
 
         echo "For more information, see https://github.com/Kamu-JP/cateye"
 
