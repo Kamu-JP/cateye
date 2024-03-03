@@ -42,19 +42,19 @@ sudo cateye update
 ### Ensure that the environment necessary for Cateye to operate is in place
 
 ```zsh
-cateye doctor
+sudo cateye doctor
 ```
 
 ## Install or Update Kamu Package from Kamu Dev With Cateye
 
 ```zsh
-cateye install [package name]
+sudo cateye install [package name]
 ```
 
 ## Install or Update Kamu Package from Other Site With Cateye
 
 ```zsh
-cateye url [url of Kamu Package JSON]
+sudo cateye url [url of Kamu Package JSON]
 ```
 
 ## Update (or Reinstall) Cateye
