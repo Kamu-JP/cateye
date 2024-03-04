@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="7.1.0"
+cateyeversion="7.1.1"
 cateyechanges="Update install process"
 
 # Extract command and package name from argument
@@ -176,6 +176,7 @@ draw_progress_bar() {
 install_file() {
 
     local url="$1"
+    local file="$2"
     local filename
     filename=$(basename "$url")
     sudo cp -r "./$filename/$file" "/usr/local/bin/" || { logging "error" "Failed to install $file" ; rm "./$file"; exit 1; }
@@ -213,7 +214,7 @@ install_dependencies() {
     download_tar $main_url
     files=$(echo "$pkg_json" | jq -r '.files | to_entries[] | .value')
     for file in $files; do
-        install_file "$file"
+        install_file "$json_url" "$file"
     done
 
     runscript=true
@@ -343,14 +344,14 @@ install_software() {
 
     draw_progress_bar 0 "Download Main software"
     
-    download_tar $main_url
+    download_tar $json_url
 
     draw_progress_bar 1 "Download Main software"
 
     files=$(echo "$pkg_json" | jq -r '.files | to_entries[] | .value')
     for file in $files; do
         draw_progress_bar 0 "Install: $file"
-        install_file "$file"
+        install_file "$json_url" "$file"
         draw_progress_bar 1 "Install: $file"
     done
 
