@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cateyeversion="6.0.1"
-cateyechanges="Bug fix"
+cateyeversion="7.0.0"
+cateyechanges="Update download process"
 
 # Extract command and package name from argument
 command="$1"
@@ -263,6 +263,19 @@ install_software() {
     fi
 
     case $2 in
+
+        "github")
+            
+            os_id=$(get_os)
+            package_name="$1"
+            logging "step" "Start the installation." 
+            draw_progress_bar 0 "Download JSON File"
+            json_url="https://raw.githubusercontent.com/Kamu-JP/cateye-packages/main/$package_name.json"
+            pkg_json=$(curl -sS "$json_url") || { logging "error" "Failed to retrieve JSON File from $json_url"; exit 1; }
+            draw_progress_bar 1 "Download JSON File"
+
+            ;;
+
         "kamujp")
             
             os_id=$(get_os)
@@ -388,6 +401,12 @@ case "$command" in
         ;;
 
     "install")
+
+        install_software "$2" "github"
+
+        ;;
+
+    "kamujp")
 
         install_software "$2" "kamujp"
 
