@@ -6,12 +6,6 @@ This is software for installing Open-source Software.
 
 [Package repo](https://github.com/Kamu-JP/cateye-packages) | [Introduction page (Japanese)](https://dl.kamu.jp/cateye/) | [Homebrew](https://github.com/DiamondGotCat/homebrew-cateye/) | [Packages by Kamu Dev](https://dl.kamu.jp/cateye/packages/) | [for Windows](https://github.com/Kamu-JP/cateye-win/) | [Terminal Theme](https://github.com/Kamu-JP/cateye/wiki/Catheme-for-macOS-Terminal)
 
-## Versions
-
-- Cateye 1 ~ 5: None
-- Cateye 6: "Golden-Drive"
-- Cateye 7: "Green-and-Sky"
-
 ## Operating environment
 
 ### macOS & Linux
