@@ -376,7 +376,7 @@ case "$command" in
             logging "info" "Updating Cateye: $current_script"
             current_script="$0"
             logging "info" "Downloading latest script to $current_script"
-            curl -sS -o "$current_script" "https://github.com/Kamu-JP/cateye/raw/main/cateye" || { logging "error" "Failed to download latest script"; exit 1; }
+            curl -sS -o "$current_script" "https://github.com/Kamu-JP/cateye/raw/main/cateye.sh" || { logging "error" "Failed to download latest script"; exit 1; }
             chmod +x "$current_script"
             logging "checkmark" "Updated successfully."
         fi
