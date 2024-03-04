@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cateyeversion="7.0.3"
-cateyechanges="Update download process"
+cateyeversion="7.1.0"
+cateyechanges="Update install process"
 
 # Extract command and package name from argument
 command="$1"
@@ -23,6 +23,17 @@ download_and_install() {
     sudo cp -r "./$package_name" "/usr/local/bin/" || { logging "error" "Failed to install $filename" ; rm "./$package_name"; exit 1; }
     rm "./$package_name"
     chmod +x "/usr/local/bin/$package_name"
+}
+
+download_tar() {
+
+    local url="$1"
+    local filename
+    filename=$(basename "$url")
+    curl -s -LO "$url" || { logging "error" "Failed to download: $url" ; exit 1; }
+    tar -xzf "$filename" || { logging "error" "Failed to extract $filename" ; rm "$filename"; exit 1; }
+    rm "$filename"
+
 }
 
 logging() {
@@ -162,6 +173,17 @@ draw_progress_bar() {
 
 }
 
+install_file() {
+
+    local url="$1"
+    local filename
+    filename=$(basename "$url")
+    sudo cp -r "./$filename/$file" "/usr/local/bin/" || { logging "error" "Failed to install $file" ; rm "./$file"; exit 1; }
+    rm "./$filename/$file"
+    chmod +x "/usr/local/bin/$file"
+
+}
+
 install_dependencies() {
 
     local package_url
@@ -183,18 +205,17 @@ install_dependencies() {
     pkg_json=$(curl -sS "$json_url") || { logging "error" "Failed to retrieve JSON File from $json_url" ; exit 1; }
     package_name=$(echo "$pkg_json" | jq -r '.name')
     dependencies=$(echo "$pkg_json" | jq -r '.dependencies | to_entries[] | .value')
+
     for url in $dependencies; do
         install_dependencies "$url"
     done
-    os_id=$(get_os)
-    target_key="$os_id"
-    result=$(echo "$pkg_json" | jq ". | has(\"$target_key\")")
-    if [ "$result" == "true" ]; then
-        download_and_install "$url_of_software_for_this_os"
-    else
-        main_url=$(echo "$pkg_json" | jq -r '.url')
-        download_and_install "$main_url"
-    fi
+    
+    download_tar $main_url
+    files=$(echo "$pkg_json" | jq -r '.files | to_entries[] | .value')
+    for file in $files; do
+        install_file "$file"
+    done
+
     runscript=true
     allow_running_script=true
     scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { logging "warn" "Skip this because there is no setup script."; runscript=false; }
@@ -319,17 +340,20 @@ install_software() {
         draw_progress_bar 1 "Install dependencies: $url"
         printf "\n"
     done
-    os_id=$(get_os)
-    target_key="$os_id"
-    result=$(echo "$pkg_json" | jq ". | has(\"$target_key\")")
-    draw_progress_bar 0 "Install Main software"
-    if [ "$result" == "true" ]; then
-        download_and_install "$url_of_software_for_this_os"
-    else
-        main_url=$(echo "$pkg_json" | jq -r '.url')
-        download_and_install "$main_url"
-    fi
-    draw_progress_bar 1 "Install Main software"
+
+    draw_progress_bar 0 "Download Main software"
+    
+    download_tar $main_url
+
+    draw_progress_bar 1 "Download Main software"
+
+    files=$(echo "$pkg_json" | jq -r '.files | to_entries[] | .value')
+    for file in $files; do
+        draw_progress_bar 0 "Install: $file"
+        install_file "$file"
+        draw_progress_bar 1 "Install: $file"
+    done
+
     printf "\n"
     draw_progress_bar 0 "Running setup script"
     runscript=true
