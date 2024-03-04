@@ -4,7 +4,7 @@
 
 This is software for installing Open-source Software.
 
-[Introduction page (Japanese)](https://dl.kamu.jp/cateye/) | [Homebrew](https://github.com/DiamondGotCat/homebrew-cateye/) | [Packages by Kamu Dev](https://dl.kamu.jp/cateye/packages/) | [for Windows](https://github.com/Kamu-JP/cateye-win/) | [Terminal Theme](https://github.com/Kamu-JP/cateye/wiki/Catheme-for-macOS-Terminal)
+[Package repo](https://github.com/Kamu-JP/cateye-packages) | [Introduction page (Japanese)](https://dl.kamu.jp/cateye/) | [Homebrew](https://github.com/DiamondGotCat/homebrew-cateye/) | [Packages by Kamu Dev](https://dl.kamu.jp/cateye/packages/) | [for Windows](https://github.com/Kamu-JP/cateye-win/) | [Terminal Theme](https://github.com/Kamu-JP/cateye/wiki/Catheme-for-macOS-Terminal)
 
 ## Versions
 
