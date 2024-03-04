@@ -9,7 +9,7 @@ This is software for installing Open-source Software.
 ## Versions
 
 - Cateye 1 ~ 5: None
-- Cateye 6: "Gold"
+- Cateye 6: "Golden-Drive"
 - Cateye 7: "Green-and-Sky"
 
 ## Operating environment
