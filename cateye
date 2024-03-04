@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cateyeversion="5.28.1"
-cateyechanges="Add progress bar to install command."
+cateyeversion="6.0.0"
+cateyechanges="Add 'file' mode to cateye."
 
 # Extract command and package name from argument
 command="$1"
@@ -274,6 +274,14 @@ install_software() {
             draw_progress_bar 1 "Download JSON File"
 
             ;;
+
+        "file")
+
+            file_path="$1"
+            pkg_json=$(cat "$file_path")
+            package_name=$(echo "$pkg_json" | jq -r '.name')
+
+            ;;
         "other")
         
             os_id=$(get_os)
@@ -382,6 +390,12 @@ case "$command" in
     "install")
 
         install_software "$2" "kamujp"
+
+        ;;
+
+    "file")
+
+        install_software "$2" "file"
 
         ;;
 
