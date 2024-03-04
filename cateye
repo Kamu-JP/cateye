@@ -1,14 +1,14 @@
 #!/bin/bash
 
-cateyeversion="6.0.0"
-cateyechanges="Add 'file' mode to cateye."
+cateyeversion="6.0.1"
+cateyechanges="Bug fix"
 
 # Extract command and package name from argument
 command="$1"
 
 # Check if running with sudo
 if [ $EUID -ne 0 ]; then
-    echo "Update command is must be run as root" 
+    echo "Must be run as root" 
     exit 1
 fi
 
