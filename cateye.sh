@@ -239,7 +239,7 @@ get_os() {
 
 get_latest_version() {
     local latest_version
-    latest_version=$(curl -sS https://github.com/Kamu-JP/cateye/raw/main/version.html)
+    latest_version=$(curl -sS https://raw.githubusercontent.com/Kamu-JP/cateye/main/version.html)
     echo "$latest_version"
 }
 
