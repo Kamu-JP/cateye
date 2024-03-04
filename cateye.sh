@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="7.1.1"
+cateyeversion="7.1.8"
 cateyechanges="Update install process"
 
 # Extract command and package name from argument
@@ -12,20 +12,14 @@ if [ $EUID -ne 0 ]; then
     exit 1
 fi
 
-download_and_install() {
-    local url="$1"
-    local filename
-    filename=$(basename "$url")
-    curl -s -LO "$url" || { logging "error" "Failed to download: $url" ; exit 1; }
-    tar -xzf "$filename" || { logging "error" "Failed to extract $filename" ; rm "$filename"; exit 1; }
-    rm "$filename"
-    # Assuming the extracted folder contains binaries to add to system bin directory
-    sudo cp -r "./$package_name" "/usr/local/bin/" || { logging "error" "Failed to install $filename" ; rm "./$package_name"; exit 1; }
-    rm "./$package_name"
-    chmod +x "/usr/local/bin/$package_name"
-}
+download_and_install_tar() {
 
-download_tar() {
+    directory="/opt/cateye/bin"
+
+    if [ ! -d "$directory" ]; then
+        sudo mkdir -p "$directory"
+        sudo chmod -R 755 "$directory"
+    fi
 
     local url="$1"
     local filename
@@ -33,6 +27,26 @@ download_tar() {
     curl -s -LO "$url" || { logging "error" "Failed to download: $url" ; exit 1; }
     tar -xzf "$filename" || { logging "error" "Failed to extract $filename" ; rm "$filename"; exit 1; }
     rm "$filename"
+    filename=$(basename "$url")
+    filename=$(echo "$filename" | sed 's/.tar.gz//')
+    sudo cp -r ./"$filename"/* "/opt/cateye/bin" || { logging "error" "Failed to install $filename" ; rm -rf ./"$filename"; exit 1; }
+    rm -rf ./"$filename"
+    sudo chmod +x /opt/cateye/bin/*
+
+    new_path="/opt/cateye/bin"
+
+    if [[ ":$PATH:" != *":$new_path:"* ]]; then
+
+        echo 'export PATH="$PATH:'"$new_path"'"' >> ~/.bashrc
+
+        if [[ -n "$(command -v zsh)" ]]; then
+            echo 'export PATH="$PATH:'"$new_path"'"' >> ~/.zshrc
+            echo 'export PATH="$PATH:'"$new_path"'"' >> ~/.zprofile
+        fi
+
+        export PATH="$PATH:$new_path"
+
+    fi
 
 }
 
@@ -173,18 +187,6 @@ draw_progress_bar() {
 
 }
 
-install_file() {
-
-    local url="$1"
-    local file="$2"
-    local filename
-    filename=$(basename "$url")
-    sudo cp -r "./$filename/$file" "/usr/local/bin/" || { logging "error" "Failed to install $file" ; rm "./$file"; exit 1; }
-    rm "./$filename/$file"
-    chmod +x "/usr/local/bin/$file"
-
-}
-
 install_dependencies() {
 
     local package_url
@@ -205,21 +207,18 @@ install_dependencies() {
     json_url="$package_url"
     pkg_json=$(curl -sS "$json_url") || { logging "error" "Failed to retrieve JSON File from $json_url" ; exit 1; }
     package_name=$(echo "$pkg_json" | jq -r '.name')
-    dependencies=$(echo "$pkg_json" | jq -r '.dependencies | to_entries[] | .value')
+    dependencies=$(echo "$pkg_json" | jq -r '.dependencies[]')
 
     for url in $dependencies; do
         install_dependencies "$url"
     done
-    
-    download_tar $main_url
-    files=$(echo "$pkg_json" | jq -r '.files | to_entries[] | .value')
-    for file in $files; do
-        install_file "$json_url" "$file"
-    done
+
+    main_url=$(echo "$pkg_json" | jq -r '.url')
+    download_and_install_tar $main_url
 
     runscript=true
     allow_running_script=true
-    scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { logging "warn" "Skip this because there is no setup script."; runscript=false; }
+    scripts=$(echo "$pkg_json" | jq -r '.script[]') || { logging "warn" "Skip this because there is no setup script."; runscript=false; }
     case $runscript in
         true)
 
@@ -271,6 +270,7 @@ install_software() {
     local package_name
     local json_url
     local pkg_json
+    local main_url
 
     if [ -n "$1" ]; then
         if [ -n "$2" ]; then
@@ -331,7 +331,7 @@ install_software() {
     esac
 
     printf "\n"
-    dependencies=$(echo "$pkg_json" | jq -r '.dependencies | to_entries[] | .value')
+    dependencies=$(echo "$pkg_json" | jq -r '.dependencies[]')
     index_ins_dep=0
 
     for url in $dependencies; do
@@ -342,24 +342,19 @@ install_software() {
         printf "\n"
     done
 
-    draw_progress_bar 0 "Download Main software"
+    main_url=$(echo "$pkg_json" | jq -r '.url')
+
+    draw_progress_bar 0 "Install Main software"
     
-    download_tar $json_url
+    download_and_install_tar $main_url
 
-    draw_progress_bar 1 "Download Main software"
-
-    files=$(echo "$pkg_json" | jq -r '.files | to_entries[] | .value')
-    for file in $files; do
-        draw_progress_bar 0 "Install: $file"
-        install_file "$json_url" "$file"
-        draw_progress_bar 1 "Install: $file"
-    done
+    draw_progress_bar 1 "Install Main software"
 
     printf "\n"
     draw_progress_bar 0 "Running setup script"
     runscript=true
     allow_running_script=true
-    scripts=$(echo "$pkg_json" | jq -r '.script | to_entries[] | .value') || { logging "warn" "Skip this because there is no setup script."; runscript=false; }
+    scripts=$(echo "$pkg_json" | jq -r '.script[]') || { logging "warn" "Skip this because there is no setup script."; runscript=false; }
     case $runscript in
         true)
             runscript=true
