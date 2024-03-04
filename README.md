@@ -1,4 +1,4 @@
-![スクリーンショット 2024-03-04 12 02 01](https://github.com/Kamu-JP/cateye/assets/124330624/08625b3f-87d6-480f-99c3-4b521ef42c40)
+![CateyeV6](https://github.com/Kamu-JP/cateye/assets/124330624/967fab1d-f350-4564-b106-7076f58aa9bc)
 
 # cateye (Japanese: キャットアイ)
 
