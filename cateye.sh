@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="7.0.1"
+cateyeversion="7.0.2"
 cateyechanges="Update download process"
 
 # Extract command and package name from argument
@@ -239,7 +239,7 @@ get_os() {
 
 get_latest_version() {
     local latest_version
-    latest_version=$(curl -sS https://raw.githubusercontent.com/Kamu-JP/cateye/main/version.html)
+    latest_version=$(curl -sS https://dl.kamu.jp/cateye/version.html)
     echo "$latest_version"
 }
 
@@ -376,7 +376,7 @@ case "$command" in
             logging "info" "Updating Cateye: $current_script"
             current_script="$0"
             logging "info" "Downloading latest script to $current_script"
-            curl -sS -o "$current_script" "https://github.com/Kamu-JP/cateye/raw/main/cateye.sh" || { logging "error" "Failed to download latest script"; exit 1; }
+            curl -sS -o "$current_script" "https://dl.kamu.jp/cateye/cateye" || { logging "error" "Failed to download latest script"; exit 1; }
             chmod +x "$current_script"
             logging "checkmark" "Updated successfully."
         fi
