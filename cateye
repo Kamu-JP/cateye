@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="7.0.0"
+cateyeversion="7.0.1"
 cateyechanges="Update download process"
 
 # Extract command and package name from argument
@@ -239,7 +239,7 @@ get_os() {
 
 get_latest_version() {
     local latest_version
-    latest_version=$(curl -sS https://github.com/Kamu-JP/cateye/raw/main/version.txt)
+    latest_version=$(curl -sS https://github.com/Kamu-JP/cateye/raw/main/version.html)
     echo "$latest_version"
 }
 
