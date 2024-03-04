@@ -57,6 +57,12 @@ sudo cateye install [package name]
 sudo cateye url [url of Kamu Package JSON]
 ```
 
+## Install or Update Kamu Package from File With Cateye
+
+```zsh
+sudo cateye file [path of Kamu Package JSON]
+```
+
 ## Update (or Reinstall) Cateye
 
 ```zsh
