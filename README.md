@@ -20,7 +20,7 @@ Cateye is a powerful tool designed for installing open-source software effortles
 
 #### Steps
 
-1. **Install Homebrew (macOS)**
+1. **Install Homebrew**
 
     ```zsh
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
