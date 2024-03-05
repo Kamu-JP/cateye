@@ -52,25 +52,25 @@ Cateye is a powerful tool designed for installing open-source software effortles
 
 ## Package Management
 
-### Install or Update Kamu Package from Kamu Dev
+### Install official or authorised packages
 
 ```zsh
 sudo cateye install [package name]
 ```
 
-### Install or Update Kamu Package from Other Site
+### Install packages from the web
 
 ```zsh
 sudo cateye url [url of Kamu Package JSON]
 ```
 
-### Install or Update Kamu Package from File
+### Install local packages
 
 ```zsh
 sudo cateye file [path of Kamu Package JSON]
 ```
 
-### Update (or Reinstall) Cateye
+### Update Cateye
 
 ```zsh
 sudo cateye update
