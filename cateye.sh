@@ -1,16 +1,10 @@
 #!/bin/bash
 
-cateyeversion="7.1.8"
-cateyechanges="Update install process"
+cateyeversion="8.0.0"
+cateyechanges="All-new Package Manager"
 
 # Extract command and package name from argument
 command="$1"
-
-# Check if running with sudo
-if [ $EUID -ne 0 ]; then
-    echo "Must be run as root" 
-    exit 1
-fi
 
 download_and_install_tar() {
 
@@ -24,14 +18,20 @@ download_and_install_tar() {
     local url="$1"
     local filename
     filename=$(basename "$url")
+    draw_progress_bar 0 "Install: $filename"
     curl -s -LO "$url" || { logging "error" "Failed to download: $url" ; exit 1; }
+    draw_progress_bar 0.1 "Install: $filename"
     tar -xzf "$filename" || { logging "error" "Failed to extract $filename" ; rm "$filename"; exit 1; }
+    draw_progress_bar 0.2 "Install: $filename"
     rm "$filename"
+    draw_progress_bar 0.3 "Install: $filename"
     filename=$(basename "$url")
     filename=$(echo "$filename" | sed 's/.tar.gz//')
     sudo cp -r ./"$filename"/* "/opt/cateye/bin" || { logging "error" "Failed to install $filename" ; rm -rf ./"$filename"; exit 1; }
+    draw_progress_bar 0.4 "Install: $filename"
     rm -rf ./"$filename"
     sudo chmod +x /opt/cateye/bin/*
+    draw_progress_bar 0.5 "Install: $filename"
 
     new_path="/opt/cateye/bin"
 
@@ -39,12 +39,20 @@ download_and_install_tar() {
 
         echo 'export PATH="$PATH:'"$new_path"'"' >> ~/.bashrc
 
+        draw_progress_bar 0.6 "Install: $filename"
+
         if [[ -n "$(command -v zsh)" ]]; then
+
             echo 'export PATH="$PATH:'"$new_path"'"' >> ~/.zshrc
+            draw_progress_bar 0.7 "Install: $filename"
             echo 'export PATH="$PATH:'"$new_path"'"' >> ~/.zprofile
+            draw_progress_bar 0.8 "Install: $filename"
+
         fi
 
         export PATH="$PATH:$new_path"
+
+        draw_progress_bar 0.9 "Install: $filename"
 
     fi
 
@@ -387,6 +395,11 @@ install_software() {
 case "$command" in
     "update")
 
+        if [ $EUID -ne 0 ]; then
+            logging "error" "Update command is must be run as root" 
+            exit 1
+        fi
+
         latest_version=$(get_latest_version)
         if [[ "$cateyeversion" == "$latest_version" ]]; then
             logging "step" "cateye V$cateyeversion"
@@ -422,24 +435,40 @@ case "$command" in
 
     "install")
 
+        if [ $EUID -ne 0 ]; then
+            logging "error" "Install command is must be run as root" 
+            exit 1
+        fi
         install_software "$2" "github"
 
         ;;
 
     "kamujp")
 
+        if [ $EUID -ne 0 ]; then
+            logging "error" "Install (Option: Kamu-JP) command is must be run as root" 
+            exit 1
+        fi
         install_software "$2" "kamujp"
 
         ;;
 
     "file")
 
+        if [ $EUID -ne 0 ]; then
+            logging "error" "Install (Option: File) command is must be run as root" 
+            exit 1
+        fi
         install_software "$2" "file"
 
         ;;
 
     "url")
 
+        if [ $EUID -ne 0 ]; then
+            logging "error" "Install (Option: URL) command is must be run as root" 
+            exit 1
+        fi
         install_software "$2" "other"
 
         ;;
@@ -474,6 +503,8 @@ case "$command" in
 
     *)
 
+        logging "error" "Unknown command."
+
         latest_version=$(get_latest_version)
         if [[ "$cateyeversion" == "$latest_version" ]]; then
             logging "step" "cateye V$cateyeversion"
@@ -486,16 +517,7 @@ case "$command" in
 
         echo " "
         logging "step" "Usage" 
-        echo "Update:"
-        echo " sudo cateye update"
-        echo "Run doctor:"
-        echo " sudo cateye doctor"
-        echo "Install from Kamu Dev:"
-        echo " sudo cateye install [package name]"
-        echo "Install from Other Site:"
-        echo " sudo cateye url [url of Kamu Package JSON]"
-        echo "Show version:"
-        echo " sudo cateye version"
+        echo ""
 
         echo "For more information, see https://github.com/Kamu-JP/cateye"
 
