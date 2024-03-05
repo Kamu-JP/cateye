@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="8.0.0"
+cateyeversion="8.0.1"
 cateyechanges="All-new Package Manager"
 
 # Extract command and package name from argument
@@ -352,11 +352,13 @@ install_software() {
 
     main_url=$(echo "$pkg_json" | jq -r '.url')
 
-    draw_progress_bar 0 "Install Main software"
+    filename=$(basename "$url")
+
+    draw_progress_bar 0 "Install: $filename"
     
     download_and_install_tar $main_url
 
-    draw_progress_bar 1 "Install Main software"
+    draw_progress_bar 1 "Install: $filename"
 
     printf "\n"
     draw_progress_bar 0 "Running setup script"
