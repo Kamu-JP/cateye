@@ -93,8 +93,6 @@ To create a Kamu Package JSON, follow this structure and publish it on the web.
 {
   "name": "example_json",
   "url": "Specify the URL of the Tar file containing the binary or Unix executable file here",
-  "macos14": "Enter the package URL for macOS Sonoma (14.x.x) here. (Optional)",
-  "linux38": "Enter the package URL for Fedora linux 38 here. (Optional)",
   "dependencies": [
     "Specify dependency Kamu Package JSON file here",
     "Specify dependency Kamu Package JSON file here (2)"
