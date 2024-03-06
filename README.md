@@ -22,7 +22,7 @@ Cateye is a powerful tool designed for installing open-source software effortles
 
 1. **[Download Installer](https://dl.kamu.jp/cateye/CateyeInstaller.zip)**
 4. **Unzip**
-5. **Open Installer**
+5. **Open Installer (Right click and open from menu)**
 6. **Click Plus Icon**
 
 #### Homebrew (Also install Homebrew)
