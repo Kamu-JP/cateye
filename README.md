@@ -1,4 +1,4 @@
-![Cateye-new-color](https://github.com/Kamu-JP/cateye/assets/124330624/a29c27e3-f787-4b6f-8558-9d5e8bdc55b7)
+<img src="https://dl.kamu.jp/cateye/disk.png" alt="Cateye" style="text-align: center;" width="500" height="500">
 
 Cateye is a powerful tool designed for installing open-source software effortlessly. Whether you're a developer or a regular user, Cateye simplifies the process of managing and installing software packages on your system. Below, you'll find everything you need to know to get started with Cateye.
 
