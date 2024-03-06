@@ -136,8 +136,8 @@ catest
 
 ## Additional Resources
 
+- [Introduction page](https://app.kamu.jp/cateye/)
 - [Package repository](https://github.com/Kamu-JP/cateye-packages)
-- [Introduction page (Japanese)](https://dl.kamu.jp/cateye/)
 - [Homebrew repository](https://github.com/DiamondGotCat/homebrew-cateye/)
 - [Packages by Kamu Dev](https://dl.kamu.jp/cateye/packages/)
 - [Cateye for Windows](https://github.com/Kamu-JP/cateye-win/)
