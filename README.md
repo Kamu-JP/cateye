@@ -59,6 +59,16 @@ Cateye is a powerful tool designed for installing open-source software effortles
 
 ## Package Management
 
+### GUI
+
+1. **[Download GUI App](https://dl.kamu.jp/cateye/CateyeGUI.zip)**
+2. **Unzip**
+3. **Open Installer (Right click and open from menu)**
+4. **Enter URL**
+5. **Click Plus Icon**
+6. **Enter Password**
+7. **Click 'OK'**
+
 ### Install official or authorised packages
 
 ```zsh
