@@ -1,5 +1,3 @@
-<img src="https://dl.kamu.jp/cateye/disk.png" alt="Cateye" style="text-align: center;" width="500" height="500">
-
 Cateye is a powerful tool designed for installing open-source software effortlessly. Whether you're a developer or a regular user, Cateye simplifies the process of managing and installing software packages on your system. Below, you'll find everything you need to know to get started with Cateye.
 
 ## Features and Benefits
