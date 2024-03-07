@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cateyeversion="8.0.1"
+cateyeversion="8.3.0"
 cateyechanges="All-new Package Manager"
 
 # Extract command and package name from argument
