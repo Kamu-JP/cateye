@@ -59,7 +59,7 @@ Cateye is a powerful tool designed for installing open-source software effortles
 
 ## Package Management
 
-### GUI
+### GUI (macOS)
 
 1. **[Download GUI App](https://dl.kamu.jp/cateye/CateyeGUI.zip)**
 2. **Unzip**
